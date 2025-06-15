@@ -1,5 +1,4 @@
-
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Footer } from '@/components/Footer';
@@ -41,6 +40,13 @@ const IDE = () => {
     setSplitModeActiveFile
   } = useIDEState();
 
+  // Force single mode on mobile devices
+  useEffect(() => {
+    if (isMobile && mode === 'split') {
+      setMode('single');
+    }
+  }, [isMobile, mode, setMode]);
+
   const { handleCreateFile, renameFile, deleteFile } = useFileOperations({
     mode,
     files,
@@ -56,6 +62,10 @@ const IDE = () => {
   });
 
   const handleModeChange = (newMode: 'single' | 'split') => {
+    // Don't allow split mode on mobile
+    if (isMobile && newMode === 'split') {
+      return;
+    }
     setMode(newMode);
     setPreviewKey(prev => prev + 1);
   };
@@ -115,7 +125,7 @@ const IDE = () => {
       <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-6">
         <div className={`flex ${isMobile ? 'flex-col' : 'gap-6'} ${isMobile ? 'h-[calc(100vh-120px)]' : 'h-[calc(100vh-194px)]'}`}>
           {isMobile ? (
-            // Mobile: Stack vertically
+            // Mobile: Stack vertically (always single mode)
             <div className="flex flex-col h-full gap-3">
               <div className="h-1/2 min-h-[300px]">
                 <Suspense fallback={
@@ -125,7 +135,7 @@ const IDE = () => {
                   </div>
                 }>
                   <EditorPanel
-                    mode={mode}
+                    mode="single"
                     files={files}
                     images={images}
                     activeFile={activeFile}
@@ -149,7 +159,7 @@ const IDE = () => {
                   </div>
                 }>
                   <PreviewPanel
-                    htmlContent={generateCombinedHTML(mode, files)}
+                    htmlContent={generateCombinedHTML('single', files)}
                     previewKey={previewKey}
                   />
                 </Suspense>

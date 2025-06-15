@@ -43,17 +43,6 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
                 </SelectContent>
               </Select>
             )}
-            {isMobile && (
-              <Select value={mode} onValueChange={onModeChange}>
-                <SelectTrigger className="w-[100px] bg-secondary border-border hover:bg-accent transition-colors text-foreground text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border text-popover-foreground">
-                  <SelectItem value="single">Single</SelectItem>
-                  <SelectItem value="split">Split</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
           </div>
           
           <div className="flex items-center space-x-1">
