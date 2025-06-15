@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { PreviewFrame } from '@/components/PreviewFrame';
@@ -13,14 +14,14 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   htmlContent,
   previewKey
 }) => {
-  // Handler: open live preview in a new tab as HTML (using a data URL)
+  // Handler: open live preview in a new tab at about:blank and write content into it
   const openPreviewInNewTab = () => {
-    // Create a Blob and object URL for the HTML
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank", "noopener,noreferrer");
-    // Best practice: clean up URL after use
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    const newWindow = window.open("about:blank", "_blank", "noopener,noreferrer");
+    if (newWindow) {
+      newWindow.document.open();
+      newWindow.document.write(htmlContent);
+      newWindow.document.close();
+    }
   };
 
   return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CodeEditor } from '@/components/CodeEditor';
@@ -26,12 +26,29 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
   onActiveTabChange,
   onFileUpdate
 }) => {
-  // Handler to open the editor area in fullscreen
-  const openEditorFullscreen = () => {
-    // Try Fullscreen API only for the Card itself (for in-place full screen)
-    const editorPanel = document.getElementById("editor-panel-root");
-    if (editorPanel && editorPanel.requestFullscreen) {
-      editorPanel.requestFullscreen();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleFullscreenChange = useCallback(() => {
+    // This will fire on any fullscreen change on the page
+    setIsFullscreen(
+      document.fullscreenElement === document.getElementById("editor-panel-root")
+    );
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }
+  }, [handleFullscreenChange]);
+
+  const toggleEditorFullscreen = () => {
+    const panel = document.getElementById("editor-panel-root");
+    if (!panel) return;
+    if (document.fullscreenElement === panel) {
+      document.exitFullscreen?.();
+    } else {
+      panel.requestFullscreen?.();
     }
   };
 
@@ -40,7 +57,7 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
       <PanelToolbar
         icon={<Code className="w-5 h-5 text-blue-400" />}
         title="Code Editor"
-        onFullscreen={openEditorFullscreen}
+        onFullscreen={toggleEditorFullscreen}
       >
         <div className="flex space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
