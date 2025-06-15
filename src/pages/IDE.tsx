@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { IDEHeader } from '@/components/IDEHeader';
-import { EditorSection } from '@/components/EditorSection';
-import { PreviewSection } from '@/components/PreviewSection';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import React, { Suspense, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+
+// Lazy-load panels for faster initial load
+const EditorPanel = React.lazy(() => import('./IDE/EditorPanel').then(m => ({ default: m.EditorPanel })));
+const PreviewPanel = React.lazy(() => import('./IDE/PreviewPanel').then(m => ({ default: m.PreviewPanel })));
+import { IDESidebar } from './IDE/IDESidebar';
 
 interface FileContent {
   [fileName: string]: string;
@@ -415,51 +417,48 @@ console.log('New JavaScript file created');`;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <IDEHeader
+      <IDESidebar
         mode={mode}
-        onModeChange={setMode}
-        onRunCode={() => setPreviewKey(prev => prev + 1)}
+        onModeChange={handleModeChange}
+        onRunCode={runCode}
         onResetCode={resetCode}
         onDownloadProject={downloadProject}
       />
 
       <div className="container mx-auto px-4 py-6">
-        {/* Increase gap between panels to gap-6 */}
         <div className="h-[calc(100vh-140px)] flex gap-6">
           <ResizablePanelGroup direction="horizontal" className="min-h-full flex-1">
             <ResizablePanel defaultSize={50} minSize={30}>
-              <EditorSection
-                mode={mode}
-                files={mode === 'single' ? singleModeFiles : splitModeFiles}
-                images={mode === 'single' ? singleModeImages : splitModeImages}
-                activeFile={mode === 'single' ? singleModeActiveFile : splitModeActiveFile}
-                onActiveFileChange={fileName => {
-                  if (mode === 'single') {
-                    setSingleModeActiveFile(fileName);
-                  } else {
-                    setSplitModeActiveFile(fileName);
-                  }
-                }}
-                onFileUpdate={updateFile}
-                onFileCreate={handleCreateFile}
-                onFileDelete={deleteFile}
-                onFileRename={renameFile}
-                onImageUpload={handleImageUpload}
-                onImageDelete={handleImageDelete}
-                onImageRename={handleImageRename}
-              />
+              <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading editor...</div>}>
+                <EditorPanel
+                  mode={mode}
+                  files={files}
+                  images={images}
+                  activeFile={activeFile}
+                  onActiveFileChange={setActiveFile}
+                  onFileUpdate={updateFile}
+                  onFileCreate={handleCreateFile}
+                  onFileDelete={deleteFile}
+                  onFileRename={renameFile}
+                  onImageUpload={handleImageUpload}
+                  onImageDelete={handleImageDelete}
+                  onImageRename={handleImageRename}
+                />
+              </Suspense>
             </ResizablePanel>
-            
+
             <ResizableHandle 
               withHandle 
               className="w-2 bg-transparent hover:bg-blue-500/20 transition-colors border-l border-transparent hover:border-blue-500 group"
             />
-            
+
             <ResizablePanel defaultSize={50} minSize={30}>
-              <PreviewSection
-                htmlContent={generateCombinedHTML()}
-                previewKey={previewKey}
-              />
+              <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading preview...</div>}>
+                <PreviewPanel
+                  htmlContent={generateCombinedHTML()}
+                  previewKey={previewKey}
+                />
+              </Suspense>
             </ResizablePanel>
           </ResizablePanelGroup>
         </div>
