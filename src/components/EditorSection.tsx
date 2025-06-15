@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CodeEditor } from '@/components/CodeEditor';
-import { Code } from 'lucide-react';
+import { PanelToolbar } from "@/components/PanelToolbar";
+import { Code } from "lucide-react";
 
 interface FileContent {
   html: string;
@@ -26,20 +26,28 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
   onActiveTabChange,
   onFileUpdate
 }) => {
+  // Handler to open the editor area in fullscreen
+  const openEditorFullscreen = () => {
+    // Try Fullscreen API only for the Card itself (for in-place full screen)
+    const editorPanel = document.getElementById("editor-panel-root");
+    if (editorPanel && editorPanel.requestFullscreen) {
+      editorPanel.requestFullscreen();
+    }
+  };
+
   return (
-    <Card className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
-      <div className="flex items-center justify-between p-4 border-b border-border bg-card/80">
-        <div className="flex items-center space-x-3">
-          <Code className="w-5 h-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-foreground">Code Editor</h2>
-        </div>
+    <Card id="editor-panel-root" className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
+      <PanelToolbar
+        icon={<Code className="w-5 h-5 text-blue-400" />}
+        title="Code Editor"
+        onFullscreen={openEditorFullscreen}
+      >
         <div className="flex space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
           <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
           <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
         </div>
-      </div>
-      
+      </PanelToolbar>
       <div className="flex-1 flex flex-col">
         {mode === 'single' ? (
           <CodeEditor
