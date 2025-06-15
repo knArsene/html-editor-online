@@ -7,11 +7,23 @@ export interface FileContent {
 }
 
 function extractCodeFromHTML(html: string) {
-  const styleMatch = html.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
-  const scriptMatch = html.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+  // Get all <style> contents, join together
+  const styleBlocks = [];
+  const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+  let styleMatch;
+  while ((styleMatch = styleRegex.exec(html)) !== null) {
+    styleBlocks.push(styleMatch[1].trim());
+  }
+  const css = styleBlocks.join('\n\n');
 
-  const css = styleMatch ? styleMatch[1].trim() : "";
-  const js = scriptMatch ? scriptMatch[1].trim() : "";
+  // Get all <script> contents, join together
+  const scriptBlocks = [];
+  const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+  let scriptMatch;
+  while ((scriptMatch = scriptRegex.exec(html)) !== null) {
+    scriptBlocks.push(scriptMatch[1].trim());
+  }
+  const js = scriptBlocks.join('\n\n');
 
   // remove <style> and <script> blocks
   let cleanHtml = html
