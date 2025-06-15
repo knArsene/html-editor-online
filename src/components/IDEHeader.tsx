@@ -4,7 +4,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Play, Download, RefreshCw } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
 interface IDEHeaderProps {
   mode: 'single' | 'split';
   onModeChange: (value: 'single' | 'split') => void;
@@ -12,7 +11,6 @@ interface IDEHeaderProps {
   onResetCode: () => void;
   onDownloadProject: () => void;
 }
-
 export const IDEHeader: React.FC<IDEHeaderProps> = ({
   mode,
   onModeChange,
@@ -20,14 +18,11 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
   onResetCode,
   onDownloadProject
 }) => {
-  return (
-    <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10 shadow-lg">
+  return <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10 shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center space-x-2 sm:space-x-6">
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent shrink-0">
-              html-editor.online
-            </h1>
+            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text shrink-0 text-slate-950">html-editor</h1>
             <Select value={mode} onValueChange={onModeChange}>
               <SelectTrigger className="w-[160px] sm:w-[180px] bg-secondary border-border hover:bg-accent transition-colors text-foreground">
                 <SelectValue />
@@ -50,6 +45,17 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
                 <p>Run Code</p>
               </TooltipContent>
             </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={onResetCode} variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:text-orange-300 transition-colors" size="icon">
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset Code</p>
+              </TooltipContent>
+            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -66,6 +72,5 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
