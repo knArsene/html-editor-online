@@ -226,6 +226,7 @@ const IDE = () => {
     }
   };
 
+  // Helper for file templates (already exists)
   const getFileTemplate = (fileName: string) => {
     const ext = fileName.split('.').pop()?.toLowerCase();
     switch (ext) {
@@ -256,9 +257,15 @@ console.log('New JavaScript file created');`;
     }
   };
 
-  const createFile = () => {
-    const fileName = prompt('Enter file name with extension (e.g., "about.html", "theme.css", "utils.js", "data.json"):');
-    if (fileName && fileName.trim() && !files[fileName]) {
+  // Add state to handle deferred file creation name (from custom dialog)
+  const [pendingFileName, setPendingFileName] = useState<string | null>(null);
+
+  // Update file creation to NOT use prompt, but accept filename from dialog
+  // If a filename is provided, create and set active. (called from FileAddMenu via AddFileDialog)
+  const handleCreateFile = (fileName?: string) => {
+    if (!fileName) return; // Guard: filename required
+    const filesToUse = mode === 'single' ? singleModeFiles : splitModeFiles;
+    if (fileName && fileName.trim() && !filesToUse[fileName]) {
       const content = getFileTemplate(fileName);
       if (mode === 'single') {
         setSingleModeFiles(prev => ({ ...prev, [fileName]: content }));
@@ -267,10 +274,31 @@ console.log('New JavaScript file created');`;
         setSplitModeFiles(prev => ({ ...prev, [fileName]: content }));
         setSplitModeActiveFile(fileName);
       }
-    } else if (files[fileName]) {
-      alert('A file with this name already exists!');
+    } else if (filesToUse[fileName]) {
+      toast({
+        title: 'File already exists',
+        description: `A file named "${fileName}" already exists!`,
+        variant: "destructive"
+      });
     }
   };
+
+  // Remove the old createFile function with the prompt:
+  // const createFile = () => {
+  //   const fileName = prompt('Enter file name with extension (e.g., "about.html", "theme.css", "utils.js", "data.json"):');
+  //   if (fileName && fileName.trim() && !files[fileName]) {
+  //     const content = getFileTemplate(fileName);
+  //     if (mode === 'single') {
+  //       setSingleModeFiles(prev => ({ ...prev, [fileName]: content }));
+  //       setSingleModeActiveFile(fileName);
+  //     } else {
+  //       setSplitModeFiles(prev => ({ ...prev, [fileName]: content }));
+  //       setSplitModeActiveFile(fileName);
+  //     }
+  //   } else if (files[fileName]) {
+  //     alert('A file with this name already exists!');
+  //   }
+  // };
 
   const renameFile = (oldName: string, newName: string) => {
     if (newName && newName.trim() && newName !== oldName && !files[newName]) {
@@ -389,8 +417,8 @@ console.log('New JavaScript file created');`;
     <div className="min-h-screen bg-background text-foreground">
       <IDEHeader
         mode={mode}
-        onModeChange={handleModeChange}
-        onRunCode={runCode}
+        onModeChange={setMode}
+        onRunCode={() => setPreviewKey(prev => prev + 1)}
         onResetCode={resetCode}
         onDownloadProject={downloadProject}
       />
@@ -401,12 +429,18 @@ console.log('New JavaScript file created');`;
             <ResizablePanel defaultSize={50} minSize={30}>
               <EditorSection
                 mode={mode}
-                files={files}
-                images={images}
-                activeFile={activeFile}
-                onActiveFileChange={setActiveFile}
+                files={mode === 'single' ? singleModeFiles : splitModeFiles}
+                images={mode === 'single' ? singleModeImages : splitModeImages}
+                activeFile={mode === 'single' ? singleModeActiveFile : splitModeActiveFile}
+                onActiveFileChange={fileName => {
+                  if (mode === 'single') {
+                    setSingleModeActiveFile(fileName);
+                  } else {
+                    setSplitModeActiveFile(fileName);
+                  }
+                }}
                 onFileUpdate={updateFile}
-                onFileCreate={createFile}
+                onFileCreate={handleCreateFile}
                 onFileDelete={deleteFile}
                 onFileRename={renameFile}
                 onImageUpload={handleImageUpload}
