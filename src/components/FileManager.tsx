@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { FileText, FileCode, Plus, Trash2, Edit2, Image, File, Copy, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { FileAddMenu } from "./FileAddMenu";
+import { FileItemRow } from "./FileItemRow";
 
 interface FileItem {
   name: string;
@@ -151,42 +153,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
           <FileCode className="w-3 h-3" />
           Files & Images
         </h3>
-        <Popover open={showAddMenu} onOpenChange={setShowAddMenu}>
-          <PopoverTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-6 w-6 hover:bg-accent"
-              title="Add file or image"
-              aria-label="Add file or image"
-            >
-              <Plus className="w-3 h-3" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="p-0 w-40 rounded-lg shadow-xl border z-40 bg-background animate-fade-in"
-            align="end"
-            sideOffset={8}
-          >
-            <button
-              onClick={() => {
-                onFileCreate();
-                setShowAddMenu(false);
-              }}
-              className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground rounded-t-lg flex items-center gap-2 focus:bg-accent focus:text-accent-foreground focus:outline-none"
-            >
-              <FileCode className="w-4 h-4" />
-              Add File
-            </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-green-50 dark:hover:bg-green-900 hover:text-green-700 dark:hover:text-green-200 flex items-center gap-2 focus:bg-green-50 dark:focus:bg-green-900 focus:text-green-700 dark:focus:text-green-200 focus:outline-none"
-            >
-              <Upload className="w-4 h-4" />
-              Upload Image
-            </button>
-          </PopoverContent>
-        </Popover>
+        <FileAddMenu
+          show={showAddMenu}
+          setShow={setShowAddMenu}
+          onFileCreate={onFileCreate}
+          onImageUpload={onImageUpload}
+          fileInputRef={fileInputRef}
+        />
       </div>
       
       <input
@@ -199,89 +172,26 @@ export const FileManager: React.FC<FileManagerProps> = ({
       
       <div className="flex flex-wrap gap-1 items-center">
         {allItems.map((item) => (
-          <div
+          <FileItemRow
             key={item.name}
-            className={`relative flex items-center justify-between min-w-0 max-w-[180px] px-2 py-1 rounded text-xs cursor-pointer transition-all duration-200 group border ${
-              item.isActive
-                ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                : item.type === 'image'
-                ? 'text-muted-foreground hover:bg-green-50 dark:hover:bg-green-900 hover:text-green-700 dark:hover:text-green-200 border-transparent hover:border-green-200'
-                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground border-transparent hover:border-border'
-            }`}
-          >
-            {editingItem === item.name ? (
-              <Input
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onBlur={handleEditSave}
-                className="h-5 text-xs px-1 min-w-16 w-full
-                  bg-background text-foreground
-                  border border-border
-                  placeholder:text-muted-foreground
-                  focus:outline-none focus:ring-2 focus:ring-blue-400
-                  transition-all
-                  dark:bg-background dark:text-foreground dark:placeholder:text-muted-foreground"
-                autoFocus
-              />
-            ) : (
-              <>
-                <div 
-                  onClick={() => handleItemClick(item)} 
-                  className="flex items-center gap-1.5 flex-1 min-w-0"
-                >
-                  {getFileIcon(item.name)}
-                  <span className="truncate font-medium text-xs">{item.name}</span>
-                  {item.type === 'image' && (
-                    <span className="text-[10px] bg-green-100 text-green-700 px-1 rounded">IMG</span>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-1">
-                  {item.type === 'image' && item.url && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        copyImageUrl(item.url!);
-                      }}
-                      className="p-0.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                      title="Copy image URL"
-                    >
-                      <Copy className="w-2.5 h-2.5" />
-                    </button>
-                  )}
-                  
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditStart(item.name);
-                    }}
-                    className="p-0.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded transition-colors"
-                    title="Rename"
-                  >
-                    <Edit2 className="w-2.5 h-2.5" />
-                  </button>
-                  
-                  {(files.length > 1 || item.type === 'image') && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (item.type === 'image') {
-                          onImageDelete(item.name);
-                        } else {
-                          onFileDelete(item.name);
-                        }
-                      }}
-                      className="p-0.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-2.5 h-2.5" />
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+            item={item}
+            editingItem={editingItem}
+            editValue={editValue}
+            onItemClick={handleItemClick}
+            onEditStart={handleEditStart}
+            onEditSave={handleEditSave}
+            onEditCancel={handleEditCancel}
+            setEditValue={setEditValue}
+            onCopyImageUrl={copyImageUrl}
+            onDelete={(item) => {
+              if (item.type === "image") {
+                onImageDelete(item.name);
+              } else {
+                onFileDelete(item.name);
+              }
+            }}
+            getFileIcon={getFileIcon}
+          />
         ))}
       </div>
       
