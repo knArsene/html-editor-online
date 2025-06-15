@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { FileText, FileCode, Plus, Trash2 } from 'lucide-react';
 
 interface FileManagerProps {
@@ -28,11 +26,11 @@ export const FileManager: React.FC<FileManagerProps> = ({
   };
 
   return (
-    <div className="bg-gray-800 border-b border-gray-700 p-3">
+    <div className="bg-muted border-b border-border p-3">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-white">Files</h3>
-        <Button onClick={onFileCreate} size="sm" className="bg-blue-600 hover:bg-blue-700 h-7 px-2">
-          <Plus className="w-3 h-3" />
+        <h3 className="text-sm font-semibold text-foreground">Files</h3>
+        <Button onClick={onFileCreate} size="icon" variant="default" className="h-7 w-7">
+          <Plus className="w-4 h-4" />
         </Button>
       </div>
       
@@ -40,10 +38,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
         {files.map((file) => (
           <div
             key={file}
-            className={`flex items-center space-x-1 px-2 py-1 rounded text-xs cursor-pointer transition-colors group ${
+            className={`flex items-center justify-between space-x-1 px-2 py-1 rounded text-xs cursor-pointer transition-colors group ${
               activeFile === file
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-700'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
             }`}
           >
             <div onClick={() => onFileSelect(file)} className="flex items-center space-x-1 flex-1">
@@ -56,7 +54,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                   e.stopPropagation();
                   onFileDelete(file);
                 }}
-                className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
               >
                 <Trash2 className="w-3 h-3" />
               </button>
