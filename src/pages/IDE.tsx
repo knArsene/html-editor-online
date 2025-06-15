@@ -1,17 +1,15 @@
+
 import React, { useState } from 'react';
 import { IDEHeader } from '@/components/IDEHeader';
 import { EditorSection } from '@/components/EditorSection';
 import { PreviewSection } from '@/components/PreviewSection';
-import { useFileSync } from "@/hooks/useFileSync";
 
 interface FileContent {
-  html: string;
-  css: string;
-  js: string;
+  [fileName: string]: string;
 }
 
 const INITIAL_FILES = {
-  html: `<!DOCTYPE html>
+  'index.html': `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -114,114 +112,101 @@ const INITIAL_FILES = {
         }
     </script>
 </body>
-</html>`,
-  css: `body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  text-align: center;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+</html>`
+};
 
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-h1 {
-  font-size: 2.5em;
-  margin-bottom: 20px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-p {
-  font-size: 1.2em;
-  margin-bottom: 30px;
-  opacity: 0.9;
-}
-
-button {
-  background: linear-gradient(45deg, #4CAF50, #45a049);
-  color: white;
-  border: none;
-  padding: 15px 30px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-size: 18px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-#output {
-  margin-top: 20px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  min-height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}`,
-  js: `function changeColor() {
-  const colors = [
-    'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
-    'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
-    'linear-gradient(135deg, #45b7d1 0%, #96c93d 100%)',
-    'linear-gradient(135deg, #96ceb4 0%, #ffecd2 100%)',
-    'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)',
-    'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%)'
-  ];
-  const messages = [
-    '🎨 Beautiful new gradient applied!',
-    '✨ Colors changed successfully!',
-    '🌈 Looking fantastic!',
-    '🎉 Amazing color combination!',
-    '💫 Stunning visual update!',
-    '🔥 Perfect color choice!'
-  ];
-  
-  const randomIndex = Math.floor(Math.random() * colors.length);
-  const randomColor = colors[randomIndex];
-  const randomMessage = messages[randomIndex];
-  
-  document.body.style.background = randomColor;
-  document.getElementById('output').innerHTML = \`<p style="font-size: 1.1em; font-weight: bold;">\${randomMessage}</p>\`;
-}`
+const EMPTY_SPLIT_FILES = {
+  'index.html': '',
+  'style.css': '',
+  'script.js': ''
 };
 
 const IDE = () => {
-  // Use custom hook for file sync
-  const {
-    files,
-    setFiles: updateFile,
-    mode,
-    setMode
-  } = useFileSync(INITIAL_FILES, "single");
-
-  const [activeTab, setActiveTab] = useState("html");
+  const [mode, setMode] = useState<'single' | 'split'>('single');
+  const [files, setFiles] = useState<FileContent>(INITIAL_FILES);
+  const [activeFile, setActiveFile] = useState('index.html');
   const [previewKey, setPreviewKey] = useState(0);
+
+  const handleModeChange = (newMode: 'single' | 'split') => {
+    setMode(newMode);
+    if (newMode === 'split') {
+      setFiles(EMPTY_SPLIT_FILES);
+      setActiveFile('index.html');
+    } else {
+      setFiles(INITIAL_FILES);
+      setActiveFile('index.html');
+    }
+    setPreviewKey(prev => prev + 1);
+  };
+
+  const updateFile = (fileName: string, content: string) => {
+    setFiles(prev => ({ ...prev, [fileName]: content }));
+  };
+
+  const createFile = () => {
+    const fileName = prompt('Enter file name (e.g., "styles.css", "utils.js", "about.html"):');
+    if (fileName && fileName.trim() && !files[fileName]) {
+      setFiles(prev => ({ ...prev, [fileName]: '' }));
+      setActiveFile(fileName);
+    }
+  };
+
+  const deleteFile = (fileName: string) => {
+    if (Object.keys(files).length <= 1) {
+      alert('Cannot delete the last file');
+      return;
+    }
+    if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+      const newFiles = { ...files };
+      delete newFiles[fileName];
+      setFiles(newFiles);
+      
+      if (activeFile === fileName) {
+        setActiveFile(Object.keys(newFiles)[0]);
+      }
+    }
+  };
 
   const runCode = () => setPreviewKey(prev => prev + 1);
 
-  // Always generate combined HTML for preview/download
-  const generateCombinedHTML = () => files.html;
+  const generateCombinedHTML = () => {
+    if (mode === 'single') {
+      return files['index.html'] || '';
+    }
+
+    // In split mode, combine all files
+    const htmlFile = files['index.html'] || '';
+    const cssFiles = Object.entries(files).filter(([name]) => name.endsWith('.css'));
+    const jsFiles = Object.entries(files).filter(([name]) => name.endsWith('.js'));
+
+    let combinedHTML = htmlFile;
+
+    // Inject CSS
+    if (cssFiles.length > 0) {
+      const cssContent = cssFiles.map(([, content]) => content).join('\n\n');
+      if (cssContent.trim()) {
+        if (combinedHTML.includes('</head>')) {
+          combinedHTML = combinedHTML.replace('</head>', `<style>\n${cssContent}\n</style>\n</head>`);
+        } else {
+          combinedHTML = `<style>\n${cssContent}\n</style>\n${combinedHTML}`;
+        }
+      }
+    }
+
+    // Inject JS
+    if (jsFiles.length > 0) {
+      const jsContent = jsFiles.map(([, content]) => content).join('\n\n');
+      if (jsContent.trim()) {
+        if (combinedHTML.includes('</body>')) {
+          combinedHTML = combinedHTML.replace('</body>', `<script>\n${jsContent}\n</script>\n</body>`);
+        } else {
+          combinedHTML = `${combinedHTML}\n<script>\n${jsContent}\n</script>`;
+        }
+      }
+    }
+
+    return combinedHTML;
+  };
 
   const downloadProject = () => {
     const htmlContent = generateCombinedHTML();
@@ -238,9 +223,11 @@ const IDE = () => {
 
   const resetCode = () => {
     if (confirm('Are you sure you want to reset all code? This action cannot be undone.')) {
-      updateFile("html", "");
-      updateFile("css", "");
-      updateFile("js", "");
+      if (mode === 'single') {
+        setFiles({ 'index.html': '' });
+      } else {
+        setFiles(EMPTY_SPLIT_FILES);
+      }
       setPreviewKey(prev => prev + 1);
     }
   };
@@ -249,7 +236,7 @@ const IDE = () => {
     <div className="min-h-screen bg-background text-foreground">
       <IDEHeader
         mode={mode}
-        onModeChange={setMode}
+        onModeChange={handleModeChange}
         onRunCode={runCode}
         onResetCode={resetCode}
         onDownloadProject={downloadProject}
@@ -260,9 +247,11 @@ const IDE = () => {
           <EditorSection
             mode={mode}
             files={files}
-            activeTab={activeTab}
-            onActiveTabChange={setActiveTab}
+            activeFile={activeFile}
+            onActiveFileChange={setActiveFile}
             onFileUpdate={updateFile}
+            onFileCreate={createFile}
+            onFileDelete={deleteFile}
           />
 
           <PreviewSection

@@ -1,35 +1,33 @@
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CodeEditor } from '@/components/CodeEditor';
 import { PanelToolbar } from "@/components/PanelToolbar";
+import { FileManager } from "@/components/FileManager";
 import { Code } from "lucide-react";
-
-interface FileContent {
-  html: string;
-  css: string;
-  js: string;
-}
 
 interface EditorSectionProps {
   mode: 'single' | 'split';
-  files: FileContent;
-  activeTab: string;
-  onActiveTabChange: (tab: string) => void;
-  onFileUpdate: (type: keyof FileContent, content: string) => void;
+  files: { [fileName: string]: string };
+  activeFile: string;
+  onActiveFileChange: (fileName: string) => void;
+  onFileUpdate: (fileName: string, content: string) => void;
+  onFileCreate: () => void;
+  onFileDelete: (fileName: string) => void;
 }
 
 export const EditorSection: React.FC<EditorSectionProps> = ({
   mode,
   files,
-  activeTab,
-  onActiveTabChange,
-  onFileUpdate
+  activeFile,
+  onActiveFileChange,
+  onFileUpdate,
+  onFileCreate,
+  onFileDelete
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleFullscreenChange = useCallback(() => {
-    // This will fire on any fullscreen change on the page
     setIsFullscreen(
       document.fullscreenElement === document.getElementById("editor-panel-root")
     );
@@ -52,6 +50,20 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
     }
   };
 
+  const getLanguageFromFileName = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'html':
+        return 'html';
+      case 'css':
+        return 'css';
+      case 'js':
+        return 'javascript';
+      default:
+        return 'html';
+    }
+  };
+
   return (
     <Card id="editor-panel-root" className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
       <PanelToolbar
@@ -65,56 +77,26 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
           <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
         </div>
       </PanelToolbar>
+      
       <div className="flex-1 flex flex-col">
-        {mode === 'single' ? (
-          <CodeEditor
-            language="html"
-            value={files.html}
-            onChange={(value) => onFileUpdate('html', value)}
-            className="flex-1"
+        {mode === 'split' && (
+          <FileManager
+            files={Object.keys(files)}
+            activeFile={activeFile}
+            onFileSelect={onActiveFileChange}
+            onFileCreate={onFileCreate}
+            onFileDelete={onFileDelete}
           />
-        ) : (
-          <Tabs value={activeTab} onValueChange={onActiveTabChange} className="flex-1 flex flex-col">
-            <TabsList className="bg-muted border-b border-border rounded-none p-1">
-              <TabsTrigger value="html" className="text-muted-foreground data-[state=active]:bg-orange-500 data-[state=active]:text-white font-medium px-4">
-                HTML
-              </TabsTrigger>
-              <TabsTrigger value="css" className="text-muted-foreground data-[state=active]:bg-blue-500 data-[state=active]:text-white font-medium px-4">
-                CSS
-              </TabsTrigger>
-              <TabsTrigger value="js" className="text-muted-foreground data-[state=active]:bg-purple-500 data-[state=active]:text-white font-medium px-4">
-                JavaScript
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="html" className="flex-1 m-0">
-              <CodeEditor
-                language="html"
-                value={files.html}
-                onChange={(value) => onFileUpdate('html', value)}
-                className="h-full"
-              />
-            </TabsContent>
-            
-            <TabsContent value="css" className="flex-1 m-0">
-              <CodeEditor
-                language="css"
-                value={files.css}
-                onChange={(value) => onFileUpdate('css', value)}
-                className="h-full"
-              />
-            </TabsContent>
-            
-            <TabsContent value="js" className="flex-1 m-0">
-              <CodeEditor
-                language="javascript"
-                value={files.js}
-                onChange={(value) => onFileUpdate('js', value)}
-                className="h-full"
-              />
-            </TabsContent>
-          </Tabs>
         )}
+        
+        <div className="flex-1">
+          <CodeEditor
+            language={getLanguageFromFileName(activeFile)}
+            value={files[activeFile] || ''}
+            onChange={(value) => onFileUpdate(activeFile, value)}
+            className="h-full"
+          />
+        </div>
       </div>
     </Card>
   );

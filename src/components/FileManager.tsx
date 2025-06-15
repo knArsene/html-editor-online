@@ -2,20 +2,22 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { FileText, FileCode } from 'lucide-react';
+import { FileText, FileCode, Plus, Trash2 } from 'lucide-react';
 
 interface FileManagerProps {
   files: string[];
   activeFile: string;
   onFileSelect: (file: string) => void;
   onFileCreate: () => void;
+  onFileDelete: (file: string) => void;
 }
 
 export const FileManager: React.FC<FileManagerProps> = ({
   files,
   activeFile,
   onFileSelect,
-  onFileCreate
+  onFileCreate,
+  onFileDelete
 }) => {
   const getFileIcon = (filename: string) => {
     const ext = filename.split('.').pop();
@@ -26,30 +28,42 @@ export const FileManager: React.FC<FileManagerProps> = ({
   };
 
   return (
-    <Card className="bg-gray-800 border-gray-700 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">Files</h3>
-        <Button onClick={onFileCreate} size="sm" className="bg-blue-600 hover:bg-blue-700">
-          New File
+    <div className="bg-gray-800 border-b border-gray-700 p-3">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-white">Files</h3>
+        <Button onClick={onFileCreate} size="sm" className="bg-blue-600 hover:bg-blue-700 h-7 px-2">
+          <Plus className="w-3 h-3" />
         </Button>
       </div>
       
-      <div className="space-y-1">
+      <div className="flex flex-wrap gap-1">
         {files.map((file) => (
           <div
             key={file}
-            onClick={() => onFileSelect(file)}
-            className={`flex items-center space-x-2 p-2 rounded cursor-pointer transition-colors ${
+            className={`flex items-center space-x-1 px-2 py-1 rounded text-xs cursor-pointer transition-colors group ${
               activeFile === file
                 ? 'bg-blue-600 text-white'
                 : 'text-gray-300 hover:bg-gray-700'
             }`}
           >
-            {getFileIcon(file)}
-            <span className="text-sm">{file}</span>
+            <div onClick={() => onFileSelect(file)} className="flex items-center space-x-1 flex-1">
+              {getFileIcon(file)}
+              <span>{file}</span>
+            </div>
+            {files.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFileDelete(file);
+                }}
+                className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            )}
           </div>
         ))}
       </div>
-    </Card>
+    </div>
   );
 };
