@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 
 interface CodeEditorProps {
-  language: 'html' | 'css' | 'javascript';
+  language: 'html' | 'css' | 'javascript' | 'typescript' | 'json';
   value: string;
   onChange: (value: string) => void;
   className?: string;
@@ -153,10 +153,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     switch (lang) {
       case 'javascript':
         return 'javascript';
+      case 'typescript':
+        return 'typescript';
       case 'css':
         return 'css';
       case 'html':
         return 'html';
+      case 'json':
+        return 'json';
       default:
         return 'plaintext';
     }
