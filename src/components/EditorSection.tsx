@@ -65,7 +65,7 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
   };
 
   return (
-    <Card id="editor-panel-root" className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
+    <Card id="editor-panel-root" className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm h-full">
       <PanelToolbar
         icon={<Code className="w-5 h-5 text-blue-400" />}
         title="Code Editor"
@@ -78,7 +78,7 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
         </div>
       </PanelToolbar>
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {mode === 'split' && (
           <FileManager
             files={Object.keys(files)}
@@ -89,12 +89,12 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
           />
         )}
         
-        <div className="flex-1">
+        <div className="flex-1 min-h-0">
           <CodeEditor
             language={getLanguageFromFileName(activeFile)}
             value={files[activeFile] || ''}
             onChange={(value) => onFileUpdate(activeFile, value)}
-            className="h-full"
+            className="h-full w-full"
           />
         </div>
       </div>

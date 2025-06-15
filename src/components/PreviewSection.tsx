@@ -26,7 +26,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   };
 
   return (
-    <Card className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
+    <Card className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm h-full">
       <PanelToolbar
         icon={<Eye className="w-5 h-5 text-green-400" />}
         title="Live Preview"
@@ -37,7 +37,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           <span className="text-sm text-green-400 font-medium">Live</span>
         </div>
       </PanelToolbar>
-      <div className="flex-1 p-4 bg-transparent">
+      <div className="flex-1 p-4 bg-transparent min-h-0">
         <PreviewFrame
           key={previewKey}
           htmlContent={htmlContent}
