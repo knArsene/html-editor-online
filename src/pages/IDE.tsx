@@ -1,12 +1,17 @@
-
 import React, { useState } from 'react';
 import { IDEHeader } from '@/components/IDEHeader';
 import { EditorSection } from '@/components/EditorSection';
 import { PreviewSection } from '@/components/PreviewSection';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { useToast } from '@/hooks/use-toast';
 
 interface FileContent {
   [fileName: string]: string;
+}
+
+interface ImageData {
+  name: string;
+  url: string;
 }
 
 const INITIAL_SINGLE_FILE = {
@@ -129,10 +134,16 @@ const IDE = () => {
   const [singleModeActiveFile, setSingleModeActiveFile] = useState('index.html');
   const [splitModeActiveFile, setSplitModeActiveFile] = useState('index.html');
   
+  // Image management state
+  const [singleModeImages, setSingleModeImages] = useState<ImageData[]>([]);
+  const [splitModeImages, setSplitModeImages] = useState<ImageData[]>([]);
+  
   const [previewKey, setPreviewKey] = useState(0);
+  const { toast } = useToast();
 
-  // Get current files and active file based on mode
+  // Get current files, images and active file based on mode
   const files = mode === 'single' ? singleModeFiles : splitModeFiles;
+  const images = mode === 'single' ? singleModeImages : splitModeImages;
   const activeFile = mode === 'single' ? singleModeActiveFile : splitModeActiveFile;
 
   const handleModeChange = (newMode: 'single' | 'split') => {
@@ -153,6 +164,65 @@ const IDE = () => {
       setSingleModeActiveFile(fileName);
     } else {
       setSplitModeActiveFile(fileName);
+    }
+  };
+
+  // Image management functions
+  const handleImageUpload = (name: string, file: File) => {
+    const url = URL.createObjectURL(file);
+    const imageData = { name, url };
+    
+    if (mode === 'single') {
+      setSingleModeImages(prev => [...prev, imageData]);
+    } else {
+      setSplitModeImages(prev => [...prev, imageData]);
+    }
+    
+    toast({
+      title: "Image uploaded",
+      description: `${name} is ready to use in your project`
+    });
+  };
+
+  const handleImageDelete = (name: string) => {
+    if (confirm(`Are you sure you want to delete ${name}?`)) {
+      if (mode === 'single') {
+        setSingleModeImages(prev => {
+          const image = prev.find(img => img.name === name);
+          if (image) URL.revokeObjectURL(image.url);
+          return prev.filter(img => img.name !== name);
+        });
+      } else {
+        setSplitModeImages(prev => {
+          const image = prev.find(img => img.name === name);
+          if (image) URL.revokeObjectURL(image.url);
+          return prev.filter(img => img.name !== name);
+        });
+      }
+      
+      toast({
+        title: "Image deleted",
+        description: `${name} has been removed from your project`
+      });
+    }
+  };
+
+  const handleImageRename = (oldName: string, newName: string) => {
+    if (newName && newName.trim() && newName !== oldName) {
+      if (mode === 'single') {
+        setSingleModeImages(prev => 
+          prev.map(img => img.name === oldName ? { ...img, name: newName } : img)
+        );
+      } else {
+        setSplitModeImages(prev => 
+          prev.map(img => img.name === oldName ? { ...img, name: newName } : img)
+        );
+      }
+      
+      toast({
+        title: "Image renamed",
+        description: `${oldName} renamed to ${newName}`
+      });
     }
   };
 
@@ -332,12 +402,16 @@ console.log('New JavaScript file created');`;
               <EditorSection
                 mode={mode}
                 files={files}
+                images={images}
                 activeFile={activeFile}
                 onActiveFileChange={setActiveFile}
                 onFileUpdate={updateFile}
                 onFileCreate={createFile}
                 onFileDelete={deleteFile}
                 onFileRename={renameFile}
+                onImageUpload={handleImageUpload}
+                onImageDelete={handleImageDelete}
+                onImageRename={handleImageRename}
               />
             </ResizablePanel>
             

@@ -9,23 +9,31 @@ import { Code } from "lucide-react";
 interface EditorSectionProps {
   mode: 'single' | 'split';
   files: { [fileName: string]: string };
+  images: { name: string; url: string }[];
   activeFile: string;
   onActiveFileChange: (fileName: string) => void;
   onFileUpdate: (fileName: string, content: string) => void;
   onFileCreate: () => void;
   onFileDelete: (fileName: string) => void;
   onFileRename?: (oldName: string, newName: string) => void;
+  onImageUpload: (name: string, file: File) => void;
+  onImageDelete: (name: string) => void;
+  onImageRename?: (oldName: string, newName: string) => void;
 }
 
 export const EditorSection: React.FC<EditorSectionProps> = ({
   mode,
   files,
+  images,
   activeFile,
   onActiveFileChange,
   onFileUpdate,
   onFileCreate,
   onFileDelete,
-  onFileRename
+  onFileRename,
+  onImageUpload,
+  onImageDelete,
+  onImageRename
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -88,11 +96,15 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
         {mode === 'split' && (
           <FileManager
             files={Object.keys(files)}
+            images={images}
             activeFile={activeFile}
             onFileSelect={onActiveFileChange}
             onFileCreate={onFileCreate}
             onFileDelete={onFileDelete}
             onFileRename={onFileRename}
+            onImageUpload={onImageUpload}
+            onImageDelete={onImageDelete}
+            onImageRename={onImageRename}
           />
         )}
         
