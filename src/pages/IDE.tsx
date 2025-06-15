@@ -8,7 +8,7 @@ interface FileContent {
   [fileName: string]: string;
 }
 
-const INITIAL_FILES = {
+const INITIAL_SINGLE_FILE = {
   'index.html': `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -115,7 +115,7 @@ const INITIAL_FILES = {
 </html>`
 };
 
-const EMPTY_SPLIT_FILES = {
+const INITIAL_SPLIT_FILES = {
   'index.html': '',
   'style.css': '',
   'script.js': ''
@@ -123,31 +123,50 @@ const EMPTY_SPLIT_FILES = {
 
 const IDE = () => {
   const [mode, setMode] = useState<'single' | 'split'>('single');
-  const [files, setFiles] = useState<FileContent>(INITIAL_FILES);
-  const [activeFile, setActiveFile] = useState('index.html');
+  
+  // Separate state for each mode
+  const [singleModeFiles, setSingleModeFiles] = useState<FileContent>(INITIAL_SINGLE_FILE);
+  const [splitModeFiles, setSplitModeFiles] = useState<FileContent>(INITIAL_SPLIT_FILES);
+  const [singleModeActiveFile, setSingleModeActiveFile] = useState('index.html');
+  const [splitModeActiveFile, setSplitModeActiveFile] = useState('index.html');
+  
   const [previewKey, setPreviewKey] = useState(0);
+
+  // Get current files and active file based on mode
+  const files = mode === 'single' ? singleModeFiles : splitModeFiles;
+  const activeFile = mode === 'single' ? singleModeActiveFile : splitModeActiveFile;
 
   const handleModeChange = (newMode: 'single' | 'split') => {
     setMode(newMode);
-    if (newMode === 'split') {
-      setFiles(EMPTY_SPLIT_FILES);
-      setActiveFile('index.html');
-    } else {
-      setFiles(INITIAL_FILES);
-      setActiveFile('index.html');
-    }
     setPreviewKey(prev => prev + 1);
   };
 
   const updateFile = (fileName: string, content: string) => {
-    setFiles(prev => ({ ...prev, [fileName]: content }));
+    if (mode === 'single') {
+      setSingleModeFiles(prev => ({ ...prev, [fileName]: content }));
+    } else {
+      setSplitModeFiles(prev => ({ ...prev, [fileName]: content }));
+    }
+  };
+
+  const setActiveFile = (fileName: string) => {
+    if (mode === 'single') {
+      setSingleModeActiveFile(fileName);
+    } else {
+      setSplitModeActiveFile(fileName);
+    }
   };
 
   const createFile = () => {
     const fileName = prompt('Enter file name (e.g., "styles.css", "utils.js", "about.html"):');
     if (fileName && fileName.trim() && !files[fileName]) {
-      setFiles(prev => ({ ...prev, [fileName]: '' }));
-      setActiveFile(fileName);
+      if (mode === 'single') {
+        setSingleModeFiles(prev => ({ ...prev, [fileName]: '' }));
+        setSingleModeActiveFile(fileName);
+      } else {
+        setSplitModeFiles(prev => ({ ...prev, [fileName]: '' }));
+        setSplitModeActiveFile(fileName);
+      }
     }
   };
 
@@ -159,10 +178,17 @@ const IDE = () => {
     if (confirm(`Are you sure you want to delete ${fileName}?`)) {
       const newFiles = { ...files };
       delete newFiles[fileName];
-      setFiles(newFiles);
       
-      if (activeFile === fileName) {
-        setActiveFile(Object.keys(newFiles)[0]);
+      if (mode === 'single') {
+        setSingleModeFiles(newFiles);
+        if (activeFile === fileName) {
+          setSingleModeActiveFile(Object.keys(newFiles)[0]);
+        }
+      } else {
+        setSplitModeFiles(newFiles);
+        if (activeFile === fileName) {
+          setSplitModeActiveFile(Object.keys(newFiles)[0]);
+        }
       }
     }
   };
@@ -224,9 +250,11 @@ const IDE = () => {
   const resetCode = () => {
     if (confirm('Are you sure you want to reset all code? This action cannot be undone.')) {
       if (mode === 'single') {
-        setFiles({ 'index.html': '' });
+        setSingleModeFiles({ 'index.html': '' });
+        setSingleModeActiveFile('index.html');
       } else {
-        setFiles(EMPTY_SPLIT_FILES);
+        setSplitModeFiles(INITIAL_SPLIT_FILES);
+        setSplitModeActiveFile('index.html');
       }
       setPreviewKey(prev => prev + 1);
     }
