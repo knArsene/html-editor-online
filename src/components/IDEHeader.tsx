@@ -38,8 +38,8 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border text-popover-foreground">
-                  <SelectItem value="single">Single File</SelectItem>
-                  <SelectItem value="split">Split Files</SelectItem>
+                  <SelectItem value="single">Single File mode</SelectItem>
+                  <SelectItem value="split">Split Files mode</SelectItem>
                 </SelectContent>
               </Select>
             )}
