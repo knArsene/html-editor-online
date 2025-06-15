@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { CodeEditor } from '@/components/CodeEditor';
@@ -36,7 +37,11 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
   onImageRename
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [previewingImage, setPreviewingImage] = useState<string | null>(null);
+  // We'll use one "active" key that holds either file or image name, and a flag
+  const [activePreview, setActivePreview] = useState<{ type: "file" | "image", name: string }>({
+    type: "file",
+    name: activeFile
+  });
 
   const handleFullscreenChange = useCallback(() => {
     setIsFullscreen(
@@ -50,6 +55,14 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }
   }, [handleFullscreenChange]);
+
+  useEffect(() => {
+    // Sync with parent-provided activeFile if activeFile changes (e.g. on file delete)
+    if (activePreview.type !== "file" || activePreview.name !== activeFile) {
+      setActivePreview({ type: "file", name: activeFile });
+    }
+    // eslint-disable-next-line
+  }, [activeFile]);
 
   const toggleEditorFullscreen = () => {
     const panel = document.getElementById("editor-panel-root");
@@ -79,17 +92,25 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
     }
   };
 
+  const handleFileSelect = (fileName: string) => {
+    setActivePreview({ type: "file", name: fileName });
+    onActiveFileChange(fileName);
+  };
+
   const handleImageSelect = (imageName: string) => {
-    setPreviewingImage(imageName);
+    setActivePreview({ type: "image", name: imageName });
   };
 
+  // If the active preview is an image, get its object and render preview
+  let currentPreviewImage: { name: string; url: string } | null = null;
+  if (activePreview.type === "image") {
+    currentPreviewImage = images.find(img => img.name === activePreview.name) || null;
+  }
+
+  // Close image preview simply returns to active code file
   const handleCloseImagePreview = () => {
-    setPreviewingImage(null);
+    setActivePreview({ type: "file", name: activeFile });
   };
-
-  const currentPreviewImage = previewingImage 
-    ? images.find(img => img.name === previewingImage)
-    : null;
 
   return (
     <Card id="editor-panel-root" className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm h-full">
@@ -104,14 +125,13 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
           <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
         </div>
       </PanelToolbar>
-      
       <div className="flex-1 flex flex-col min-h-0">
         {mode === 'split' && (
           <FileManager
             files={Object.keys(files)}
             images={images}
-            activeFile={activeFile}
-            onFileSelect={onActiveFileChange}
+            activeFile={activePreview.type === "file" ? activePreview.name : ""}
+            onFileSelect={handleFileSelect}
             onFileCreate={onFileCreate}
             onFileDelete={onFileDelete}
             onFileRename={onFileRename}
@@ -121,9 +141,8 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
             onImageSelect={handleImageSelect}
           />
         )}
-        
         <div className="flex-1 min-h-0">
-          {currentPreviewImage ? (
+          {activePreview.type === "image" && currentPreviewImage ? (
             <ImagePreview
               imageName={currentPreviewImage.name}
               imageUrl={currentPreviewImage.url}
@@ -131,9 +150,9 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
             />
           ) : (
             <CodeEditor
-              language={getLanguageFromFileName(activeFile)}
-              value={files[activeFile] || ''}
-              onChange={(value) => onFileUpdate(activeFile, value)}
+              language={getLanguageFromFileName(activePreview.name)}
+              value={files[activePreview.name] || ''}
+              onChange={(value) => onFileUpdate(activePreview.name, value)}
               className="h-full w-full"
             />
           )}
@@ -142,3 +161,5 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
     </Card>
   );
 };
+
+// END
