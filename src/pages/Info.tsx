@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -67,66 +66,38 @@ export const Info: React.FC = () => {
           id="blog"
           className="pt-8 -mt-8"
         >
-          <div
-            className="
-              rounded-xl bg-gradient-to-br from-card via-secondary/60 to-muted/60 
-              shadow-xl border border-border p-0 sm:p-0 
-              overflow-hidden
-              animate-fade-in
-            "
-          >
-            <div className="flex flex-col md:flex-row">
-              {/* Blog Cover Image */}
-              <div className="md:w-1/2 w-full min-h-[220px] md:min-h-[320px] bg-muted-foreground/10 flex items-center justify-center">
-                <img
-                  src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=480&q=80"
-                  alt="A futuristic workspace"
-                  className="object-cover rounded-t-xl md:rounded-l-xl md:rounded-tr-none w-full h-full max-h-[320px] transition-transform duration-300 hover:scale-105"
-                />
-              </div>
-              {/* Article content */}
-              <div className="flex-1 p-6 flex flex-col justify-between">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight mb-2 text-primary">
-                    Unlocking Creativity with Modern Web Development
-                  </h2>
-                  <div className="text-muted-foreground text-sm mb-2">
-                    By <span className="font-semibold">Aria Bennett</span> • June 15, 2025
-                  </div>
-                  <p className="text-lg text-foreground/90 mb-6">
-                    Discover how intuitive tools, AI-assistance, and modern design empower everyone to bring their ideas to life on the open web. Whether you’re a beginner or seasoned creator, harness the newest workflows and build something extraordinary.
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 mt-4">
-                  <img
-                    src="https://randomuser.me/api/portraits/women/68.jpg"
-                    alt="Author avatar"
-                    className="w-12 h-12 rounded-full border shadow"
-                  />
-                  <div>
-                    <div className="font-semibold text-md">Aria Bennett</div>
-                    <div className="text-xs text-muted-foreground">
-                      Frontend developer & tech educator.
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div className="w-full flex flex-col md:flex-row gap-0 md:gap-8 rounded-xl bg-gradient-to-br from-blue-50 via-secondary/60 to-fuchsia-50 shadow-xl border border-border overflow-hidden animate-fade-in">
+            {/* Profile Image - left side */}
+            <div className="md:w-2/5 flex justify-center items-center bg-gradient-to-b from-fuchsia-100/60 via-white to-blue-100/30 p-6 md:p-0">
+              <img
+                src="/lovable-uploads/a7e51775-73f3-4652-aa91-7b401f13bca6.png"
+                alt="Kn Arsene"
+                className="w-44 h-44 rounded-full object-cover border-4 border-white shadow-lg mt-4 mb-4 md:mt-8 md:mb-8"
+              />
             </div>
-            {/* Highlight line */}
-            <div className="h-2 bg-gradient-to-r from-fuchsia-400 via-blue-300 to-green-300 w-full mt-0"></div>
-            {/* About the Author */}
-            <div className="bg-muted/60 px-6 py-4 flex items-center gap-4 border-t border-border">
-              <div className="hidden sm:block">
-                <img
-                  src="https://randomuser.me/api/portraits/women/68.jpg"
-                  alt="Aria Bennett author image"
-                  className="w-16 h-16 rounded-full border-2 shadow"
-                />
+            {/* Description - right side */}
+            <div className="flex-1 flex flex-col justify-center p-6 md:p-10">
+              <h2 className="text-3xl font-extrabold leading-tight mb-3 text-primary">
+                Meet Kn Arsene
+              </h2>
+              <div className="text-muted-foreground text-base mb-3 font-medium">
+                Entrepreneur, Builder, Future AI Innovator
               </div>
-              <div>
-                <div className="font-bold text-primary text-lg">Aria Bennett</div>
-                <div className="text-sm text-muted-foreground">
-                  Aria helps people launch amazing web projects by sharing accessible guides and tips. Passionate about design systems, AI coding assistants, and empowering the next wave of makers.
+              <p className="text-lg text-foreground/90 mb-4">
+                I’m an entrepreneur on a mission to build powerful tools, websites, and software products using AI.
+                After launching multiple digital projects, I’ve realized the importance of coding in accelerating my journey—so now, I’m diving into programming to scale my ideas and grow my businesses even faster.
+              </p>
+              <div className="flex items-center gap-3 mt-2">
+                <img
+                  src="/lovable-uploads/a7e51775-73f3-4652-aa91-7b401f13bca6.png"
+                  alt="Kn Arsene"
+                  className="w-12 h-12 rounded-full border-2 shadow"
+                />
+                <div>
+                  <div className="font-semibold text-md">Kn Arsene</div>
+                  <div className="text-xs text-muted-foreground">
+                    Digital creator & AI-first entrepreneur
+                  </div>
                 </div>
               </div>
             </div>
