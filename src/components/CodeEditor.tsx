@@ -1,4 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+
+import React, { useRef, useEffect } from 'react';
+import Editor from '@monaco-editor/react';
+import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 
 interface CodeEditorProps {
@@ -14,132 +17,189 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onChange,
   className
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const preRef = useRef<HTMLPreElement>(null);
+  const { theme } = useTheme();
+  const editorRef = useRef(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = e.currentTarget.selectionStart;
-      const end = e.currentTarget.selectionEnd;
-      const newValue = value.substring(0, start) + '  ' + value.substring(end);
-      onChange(newValue);
-      
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 2;
-        }
-      }, 0);
-    }
-  };
-
-  const handleScroll = () => {
-    if (textareaRef.current && preRef.current) {
-      preRef.current.scrollTop = textareaRef.current.scrollTop;
-      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
-    }
-  };
-
-  const highlightSyntax = (code: string) => {
-    if (!code) return '';
+  const handleEditorDidMount = (editor: any, monaco: any) => {
+    editorRef.current = editor;
     
-    let highlighted = code;
-    
-    if (language === 'html') {
-      // HTML syntax highlighting with improved colors
-      highlighted = highlighted
-        .replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)(.*?)(&gt;)/g, '<span class="html-tag">$1$2</span><span class="html-attr">$3</span><span class="html-tag">$4</span>')
-        .replace(/(&lt;!--.*?--&gt;)/g, '<span class="html-comment">$1</span>')
-        .replace(/(=")([^"]*?)(")/g, '=<span class="html-string">"$2"</span>');
-    } else if (language === 'css') {
-      // CSS syntax highlighting with improved colors
-      highlighted = highlighted
-        .replace(/([a-zA-Z-#.]+)(\s*{)/g, '<span class="css-selector">$1</span>$2')
-        .replace(/([a-zA-Z-]+)(\s*:)/g, '<span class="css-property">$1</span>$2')
-        .replace(/(:\s*)([^;]+)(;)/g, '$1<span class="css-value">$2</span>$3')
-        .replace(/(\/\*.*?\*\/)/g, '<span class="css-comment">$1</span>');
-    } else if (language === 'javascript') {
-      // JavaScript syntax highlighting with improved colors
-      highlighted = highlighted
-        .replace(/\b(function|var|let|const|if|else|for|while|return|true|false|null|undefined|class|import|export|from|default)\b/g, '<span class="js-keyword">$1</span>')
-        .replace(/(["'])((?:\\.|[^\\])*?)\1/g, '<span class="js-string">$1$2$1</span>')
-        .replace(/\b(\d+)\b/g, '<span class="js-number">$1</span>')
-        .replace(/(\/\/.*$)/gm, '<span class="js-comment">$1</span>')
-        .replace(/(\/\*.*?\*\/)/g, '<span class="js-comment">$1</span>');
-    }
-    
-    return highlighted;
-  };
-
-  useEffect(() => {
-    const handleInput = () => {
-      if (textareaRef.current && preRef.current) {
-        const highlighted = highlightSyntax(value.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
-        preRef.current.innerHTML = highlighted + '<br>';
+    // Configure editor options
+    editor.updateOptions({
+      fontSize: 14,
+      fontFamily: 'JetBrains Mono, Fira Code, Monaco, Consolas, monospace',
+      lineHeight: 24,
+      wordWrap: 'on',
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      automaticLayout: true,
+      tabSize: 2,
+      insertSpaces: true,
+      detectIndentation: true,
+      formatOnPaste: true,
+      formatOnType: true,
+      autoClosingBrackets: 'always',
+      autoClosingQuotes: 'always',
+      autoSurround: 'languageDefined',
+      bracketPairColorization: { enabled: true },
+      guides: {
+        bracketPairs: true,
+        indentation: true
+      },
+      suggest: {
+        showKeywords: true,
+        showSnippets: true,
+        showFunctions: true,
+        showConstructors: true,
+        showFields: true,
+        showVariables: true,
+        showClasses: true,
+        showStructs: true,
+        showInterfaces: true,
+        showModules: true,
+        showProperties: true,
+        showEvents: true,
+        showOperators: true,
+        showUnits: true,
+        showValues: true,
+        showConstants: true,
+        showEnums: true,
+        showEnumMembers: true,
+        showColors: true,
+        showFiles: true,
+        showReferences: true,
+        showFolders: true,
+        showTypeParameters: true
       }
-    };
-    
-    handleInput();
-  }, [value, language]);
+    });
+
+    // Add custom CSS snippets
+    if (language === 'css') {
+      monaco.languages.registerCompletionItemProvider('css', {
+        provideCompletionItems: () => {
+          return {
+            suggestions: [
+              {
+                label: 'flexbox-center',
+                kind: monaco.languages.CompletionItemKind.Snippet,
+                insertText: 'display: flex;\njustify-content: center;\nalign-items: center;',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                documentation: 'Flexbox center alignment'
+              },
+              {
+                label: 'gradient-bg',
+                kind: monaco.languages.CompletionItemKind.Snippet,
+                insertText: 'background: linear-gradient(135deg, #${1:667eea} 0%, #${2:764ba2} 100%);',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                documentation: 'Linear gradient background'
+              }
+            ]
+          };
+        }
+      });
+    }
+
+    // Add HTML snippets
+    if (language === 'html') {
+      monaco.languages.registerCompletionItemProvider('html', {
+        provideCompletionItems: () => {
+          return {
+            suggestions: [
+              {
+                label: 'html5-boilerplate',
+                kind: monaco.languages.CompletionItemKind.Snippet,
+                insertText: '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>${1:Document}</title>\n</head>\n<body>\n    ${2}\n</body>\n</html>',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                documentation: 'HTML5 boilerplate template'
+              }
+            ]
+          };
+        }
+      });
+    }
+
+    // Add JavaScript snippets
+    if (language === 'javascript') {
+      monaco.languages.registerCompletionItemProvider('javascript', {
+        provideCompletionItems: () => {
+          return {
+            suggestions: [
+              {
+                label: 'arrow-function',
+                kind: monaco.languages.CompletionItemKind.Snippet,
+                insertText: 'const ${1:functionName} = (${2:params}) => {\n    ${3}\n};',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                documentation: 'Arrow function template'
+              },
+              {
+                label: 'async-function',
+                kind: monaco.languages.CompletionItemKind.Snippet,
+                insertText: 'const ${1:functionName} = async (${2:params}) => {\n    try {\n        ${3}\n    } catch (error) {\n        console.error(error);\n    }\n};',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                documentation: 'Async function with error handling'
+              }
+            ]
+          };
+        }
+      });
+    }
+  };
+
+  const handleChange = (value: string | undefined) => {
+    onChange(value || '');
+  };
+
+  // Map language names to Monaco editor language IDs
+  const getMonacoLanguage = (lang: string) => {
+    switch (lang) {
+      case 'javascript':
+        return 'javascript';
+      case 'css':
+        return 'css';
+      case 'html':
+        return 'html';
+      default:
+        return 'plaintext';
+    }
+  };
 
   return (
-    <div className={cn("relative flex-1 overflow-hidden bg-background", className)}>
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          /* A more vibrant and readable color scheme for syntax highlighting */
-          .html-tag { color: #38bdf8; /* sky-400 */ }
-          .html-attr { color: #facc15; /* amber-400 */ }
-          .html-string { color: #34d399; /* emerald-400 */ }
-          .html-comment { color: #94a3b8; font-style: italic; /* slate-400 */ }
-          .css-selector { color: #fb7185; /* rose-400 */ }
-          .css-property { color: #22d3ee; /* cyan-400 */ }
-          .css-value { color: #34d399; /* emerald-400 */ }
-          .css-comment { color: #94a3b8; font-style: italic; /* slate-400 */ }
-          .js-keyword { color: #e879f9; font-weight: 600; /* fuchsia-400 */ }
-          .js-string { color: #34d399; /* emerald-400 */ }
-          .js-number { color: #a3e635; /* lime-400 */ }
-          .js-comment { color: #94a3b8; font-style: italic; /* slate-400 */ }
-        `
-      }} />
-      
-      <div className="absolute inset-0 flex">
-        {/* Line numbers */}
-        <div className="w-14 bg-muted border-r border-border flex flex-col text-muted-foreground text-sm select-none">
-          <div className="px-3 py-4 font-mono leading-6">
-            {value.split('\n').map((_, index) => (
-              <div key={index} className="text-right min-h-[24px] flex items-center justify-end">
-                {index + 1}
-              </div>
-            ))}
+    <div className={cn("relative flex-1 overflow-hidden", className)}>
+      <Editor
+        height="100%"
+        language={getMonacoLanguage(language)}
+        value={value}
+        onChange={handleChange}
+        onMount={handleEditorDidMount}
+        theme={theme === 'dark' ? 'vs-dark' : 'light'}
+        options={{
+          selectOnLineNumbers: true,
+          roundedSelection: false,
+          readOnly: false,
+          cursorStyle: 'line',
+          automaticLayout: true,
+          glyphMargin: false,
+          folding: true,
+          showFoldingControls: 'mouseover',
+          foldingHighlight: true,
+          lineDecorationsWidth: 0,
+          lineNumbersMinChars: 3,
+          renderLineHighlight: 'gutter',
+          scrollbar: {
+            vertical: 'auto',
+            horizontal: 'auto',
+            verticalScrollbarSize: 12,
+            horizontalScrollbarSize: 12
+          }
+        }}
+        loading={
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+              <span>Loading editor...</span>
+            </div>
           </div>
-        </div>
-        
-        {/* Code area */}
-        <div className="flex-1 relative bg-background">
-          <pre
-            ref={preRef}
-            className="absolute inset-0 p-4 font-mono text-sm leading-6 overflow-auto pointer-events-none whitespace-pre-wrap break-words text-secondary-foreground"
-          />
-          
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onScroll={handleScroll}
-            className="absolute inset-0 p-4 bg-transparent text-transparent caret-blue-500 font-mono text-sm leading-6 resize-none outline-none overflow-auto whitespace-pre-wrap break-words selection:bg-blue-500/30"
-            spellCheck={false}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            placeholder={`Start typing ${language.toUpperCase()} code...`}
-          />
-        </div>
-      </div>
+        }
+      />
     </div>
   );
 };
