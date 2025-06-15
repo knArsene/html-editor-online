@@ -424,8 +424,9 @@ console.log('New JavaScript file created');`;
       />
 
       <div className="container mx-auto px-4 py-6">
-        <div className="h-[calc(100vh-140px)]">
-          <ResizablePanelGroup direction="horizontal" className="min-h-full">
+        {/* Add gap-4 for spacing between the panels */}
+        <div className="h-[calc(100vh-140px)] flex gap-4">
+          <ResizablePanelGroup direction="horizontal" className="min-h-full flex-1">
             <ResizablePanel defaultSize={50} minSize={30}>
               <EditorSection
                 mode={mode}
