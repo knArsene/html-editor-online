@@ -8,37 +8,28 @@ export interface FileContent {
   externalResources?: string; // Explicitly stores ALL meta/link/title etc from <head>
 }
 
-// Improved extraction: collects and preserves all external head resources
+// Improved extraction: robustly collects ALL meta/link/title from entire HTML, not just <head>
 function extractCodeFromHTML(html: string) {
-  // 1. Extract <head> content exactly
   let headContent = "";
   let externalResources = "";
+  // Find all meta, link, and title tags everywhere (in or outside <head>)
+  const resourceRegex = /(<meta[\s\S]*?>|<link[\s\S]*?>|<title>[\s\S]*?<\/title>)/gi;
+  const resources = html.match(resourceRegex);
+  if (resources) {
+    externalResources = resources.join("\n");
+  }
+
+  // Extract any extra stuff inside <head> (raw tags, not resources/styles/scripts)
   const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
   if (headMatch) {
-    headContent = headMatch[1];
-
-    // Extract all <meta>, <link>, <title> from <head>
-    const resourceRegex = /(<meta[\s\S]*?>|<link[\s\S]*?>|<title>[\s\S]*?<\/title>)/gi;
-    const resources = headContent.match(resourceRegex);
-    if (resources) {
-      externalResources = resources.join("\n");
-    }
-    // Remove style and script blocks so only naked resources remain in headContent
-    headContent = headContent
+    headContent = headMatch[1]
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
       .replace(resourceRegex, "")
       .trim();
-  } else {
-    // No <head>? Try to extract all <meta>, <link>, <title> from anywhere
-    const resourceRegex = /(<meta[\s\S]*?>|<link[\s\S]*?>|<title>[\s\S]*?<\/title>)/gi;
-    const resources = html.match(resourceRegex);
-    if (resources) {
-      externalResources = resources.join("\n");
-    }
   }
 
-  // 2. Extract all <style>
+  // Extract all <style>
   let styleBlocks = [];
   const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
   let styleMatch;
@@ -47,7 +38,7 @@ function extractCodeFromHTML(html: string) {
   }
   const css = styleBlocks.join('\n\n');
 
-  // 3. Extract all <script>
+  // Extract all <script>
   let scriptBlocks = [];
   const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
   let scriptMatch;
@@ -56,13 +47,12 @@ function extractCodeFromHTML(html: string) {
   }
   const js = scriptBlocks.join('\n\n');
 
-  // 4. Extract <body> content (or everything minus head/style/script)
+  // Extract <body>, or fallback to everything else minus handled bits
   let bodyContent = "";
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   if (bodyMatch) {
     bodyContent = bodyMatch[1].trim();
   } else {
-    // Fallback: remove head/style/script from all HTML
     let tempHtml = html
       .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
@@ -75,35 +65,35 @@ function extractCodeFromHTML(html: string) {
     css,
     js,
     headContent: headContent.trim(),
-    externalResources: externalResources.trim()
+    externalResources: externalResources.trim(),
   };
 }
 
-// Robust merge: headContent is optional, externalResources always re-injected
+// Robust merge: always re-inject all externalResources (meta, link, font, etc)
 function mergeToHTML(html: string, css: string, js: string, headContent?: string, externalResources?: string) {
   let head = "";
 
-  // 1. Insert meta/link/title resources first
+  // 1. Inject all meta/link/title
   if (externalResources && externalResources.trim()) {
     head += externalResources.trim() + "\n";
   }
 
-  // 2. Add any remaining raw headContent (extra, like custom tags)
+  // 2. Add extra raw headContent (any custom head stuff, not styles/scripts/resources)
   if (headContent && headContent.trim()) {
     head += headContent.trim() + "\n";
   }
 
-  // 3. Then insert all CSS in <style>
+  // 3. Insert all CSS
   if (css && css.trim()) {
     head += `<style>\n${css}\n</style>\n`;
   }
 
-  // 4. Always add a title if missing
+  // 4. Ensure <title> exists
   if (!/title>/i.test(head)) {
     head += `<title>Web Project</title>\n`;
   }
 
-  // 5. Build body and add JS at end
+  // Build body and add JS in body
   let body = html || "";
   let output = `<!DOCTYPE html>
 <html lang="en">
@@ -133,7 +123,7 @@ export function useFileSync(initialFiles: FileContent, initialMode: "single" | "
   const lastSplit = useRef<FileContent>(extractCodeFromHTML(initialFiles.html));
   const lastSingle = useRef<string>(initialFiles.html);
 
-  // Update file, keeping all head resources safe
+  // Update file, preserving all externalResources
   const updateFile = (type: keyof FileContent, content: string) => {
     if (mode === "single") {
       setFiles((prev) => {
@@ -146,7 +136,7 @@ export function useFileSync(initialFiles: FileContent, initialMode: "single" | "
     } else {
       setFiles((prev) => {
         const updated = { ...prev, [type]: content };
-        // Use externalResources always
+        // Always preserve latest externalResources for merge
         const externalResources =
           typeof files.externalResources === "string"
             ? files.externalResources
@@ -165,7 +155,7 @@ export function useFileSync(initialFiles: FileContent, initialMode: "single" | "
     }
   };
 
-  // Handle mode switch, always keep resources
+  // Switch mode, always keep externalResources
   const handleModeChange = (newMode: "single" | "split") => {
     setMode(newMode);
     setFiles((prev) => {
@@ -186,6 +176,7 @@ export function useFileSync(initialFiles: FileContent, initialMode: "single" | "
           externalResources: prev.externalResources,
         };
       } else {
+        // When splitting, always re-extract all head/link/meta resources for future re-merges
         const parsed = extractCodeFromHTML(prev.html);
         lastSplit.current = parsed;
         return { ...parsed };
