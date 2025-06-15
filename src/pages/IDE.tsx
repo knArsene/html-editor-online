@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CodeEditor } from '@/components/CodeEditor';
 import { PreviewFrame } from '@/components/PreviewFrame';
 import { Play, Download, RefreshCw, Code, Eye } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface FileContent {
   html: string;
@@ -278,7 +279,7 @@ ${jsTag}
                 Web IDE
               </h1>
               <Select value={mode} onValueChange={(value: 'single' | 'split') => setMode(value)}>
-                <SelectTrigger className="w-44 bg-secondary border-border hover:bg-accent transition-colors">
+                <SelectTrigger className="w-44 bg-secondary border-border hover:bg-accent transition-colors text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -301,6 +302,7 @@ ${jsTag}
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </Button>
+              <ThemeToggle />
             </div>
           </div>
         </div>
