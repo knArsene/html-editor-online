@@ -1,13 +1,14 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, FileCode, Plus } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { AddFileDialog } from "./AddFileDialog";
 
 interface FileAddMenuProps {
   show: boolean;
   setShow: (open: boolean) => void;
-  onFileCreate: () => void;
+  onFileCreate: (fileName?: string) => void;
   onImageUpload: (name: string, file: File) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
 }
@@ -19,6 +20,8 @@ export const FileAddMenu: React.FC<FileAddMenuProps> = ({
   onImageUpload,
   fileInputRef,
 }) => {
+  const [showAddFileDialog, setShowAddFileDialog] = useState(false);
+
   // File input handler scoped here (for image uploads)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -29,6 +32,11 @@ export const FileAddMenu: React.FC<FileAddMenuProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const openDialog = () => {
+    setShow(false); // close menu
+    setTimeout(() => setShowAddFileDialog(true), 50); // ensure menu is gone before dialog
   };
 
   return (
@@ -51,10 +59,7 @@ export const FileAddMenu: React.FC<FileAddMenuProps> = ({
           sideOffset={8}
         >
           <button
-            onClick={() => {
-              onFileCreate();
-              setShow(false);
-            }}
+            onClick={openDialog}
             className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground rounded-t-lg flex items-center gap-2 focus:bg-accent focus:text-accent-foreground focus:outline-none"
           >
             <FileCode className="w-4 h-4" />
@@ -75,6 +80,13 @@ export const FileAddMenu: React.FC<FileAddMenuProps> = ({
         accept="image/*"
         onChange={handleImageUpload}
         className="hidden"
+      />
+      <AddFileDialog
+        open={showAddFileDialog}
+        setOpen={setShowAddFileDialog}
+        onAdd={(fileName) => {
+          onFileCreate(fileName);
+        }}
       />
     </>
   );
