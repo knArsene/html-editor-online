@@ -40,7 +40,6 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
           </div>
           
           <div className="flex items-center space-x-1 sm:space-x-2">
-            {/* Run Code Button */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button onClick={onRunCode} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg" size="icon">
@@ -52,29 +51,17 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
               </TooltipContent>
             </Tooltip>
             
-            {/* Improved Reset Button */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  onClick={onResetCode}
-                  variant="ghost"
-                  className="border border-orange-400/60 bg-orange-100/60 text-orange-500 hover:bg-orange-300/50 hover:text-orange-700 hover:border-orange-400 px-2 py-1 rounded-lg transition-colors shadow-none h-8 w-8 flex items-center justify-center"
-                  size="icon"
-                  aria-label="Reset"
-                >
+                <Button onClick={onResetCode} variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:text-orange-300 transition-colors" size="icon">
                   <RefreshCw className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent
-                className="px-2 py-1 rounded text-xs bg-orange-50 border border-orange-300 text-orange-800 shadow-sm"
-                sideOffset={5}
-                side="bottom"
-              >
-                <span>Reset</span>
+              <TooltipContent>
+                <p>Reset Code</p>
               </TooltipContent>
             </Tooltip>
 
-            {/* Download Button */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button onClick={onDownloadProject} variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 hover:text-blue-300 transition-colors" size="icon">
