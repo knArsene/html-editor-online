@@ -1,7 +1,7 @@
 
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, FileCode } from "lucide-react";
+import { Upload, FileCode, Plus } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 interface FileAddMenuProps {
@@ -42,7 +42,7 @@ export const FileAddMenu: React.FC<FileAddMenuProps> = ({
             title="Add file or image"
             aria-label="Add file or image"
           >
-            <FileCode className="w-3 h-3" />
+            <Plus className="w-3 h-3" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
