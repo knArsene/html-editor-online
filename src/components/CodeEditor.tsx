@@ -88,19 +88,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div className={cn("relative flex-1 overflow-hidden", className)}>
-      <style jsx>{`
-        .html-tag { color: #e06c75; }
-        .html-attr { color: #d19a66; }
-        .html-string { color: #98c379; }
-        .html-comment { color: #5c6370; font-style: italic; }
-        .css-selector { color: #e06c75; }
-        .css-property { color: #56b6c2; }
-        .css-value { color: #98c379; }
-        .css-comment { color: #5c6370; font-style: italic; }
-        .js-keyword { color: #c678dd; }
-        .js-string { color: #98c379; }
-        .js-comment { color: #5c6370; font-style: italic; }
-      `}</style>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .html-tag { color: #e06c75; }
+          .html-attr { color: #d19a66; }
+          .html-string { color: #98c379; }
+          .html-comment { color: #5c6370; font-style: italic; }
+          .css-selector { color: #e06c75; }
+          .css-property { color: #56b6c2; }
+          .css-value { color: #98c379; }
+          .css-comment { color: #5c6370; font-style: italic; }
+          .js-keyword { color: #c678dd; }
+          .js-string { color: #98c379; }
+          .js-comment { color: #5c6370; font-style: italic; }
+        `
+      }} />
       
       <div className="absolute inset-0 flex">
         {/* Line numbers */}
