@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +21,7 @@ interface FileManagerProps {
   onImageUpload: (name: string, file: File) => void;
   onImageDelete: (name: string) => void;
   onImageRename?: (oldName: string, newName: string) => void;
+  onImageSelect?: (imageName: string) => void;
 }
 
 export const FileManager: React.FC<FileManagerProps> = ({
@@ -34,7 +34,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
   onFileRename,
   onImageUpload,
   onImageDelete,
-  onImageRename
+  onImageRename,
+  onImageSelect
 }) => {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -128,6 +129,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
     });
   };
 
+  const handleItemClick = (item: FileItem) => {
+    if (item.type === 'file') {
+      onFileSelect(item.name);
+    } else if (item.type === 'image' && onImageSelect) {
+      onImageSelect(item.name);
+    }
+  };
+
   // Combine files and images for display
   const allItems: (FileItem & { isActive?: boolean })[] = [
     ...files.map(file => ({ name: file, type: 'file' as const, isActive: activeFile === file })),
@@ -208,7 +217,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             ) : (
               <>
                 <div 
-                  onClick={() => item.type === 'file' ? onFileSelect(item.name) : undefined} 
+                  onClick={() => handleItemClick(item)} 
                   className="flex items-center gap-1.5 flex-1 min-w-0"
                 >
                   {getFileIcon(item.name)}

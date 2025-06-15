@@ -1,7 +1,7 @@
-
 import React, { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { CodeEditor } from '@/components/CodeEditor';
+import { ImagePreview } from '@/components/ImagePreview';
 import { PanelToolbar } from "@/components/PanelToolbar";
 import { FileManager } from "@/components/FileManager";
 import { Code } from "lucide-react";
@@ -36,6 +36,7 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
   onImageRename
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [previewingImage, setPreviewingImage] = useState<string | null>(null);
 
   const handleFullscreenChange = useCallback(() => {
     setIsFullscreen(
@@ -78,6 +79,18 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
     }
   };
 
+  const handleImageSelect = (imageName: string) => {
+    setPreviewingImage(imageName);
+  };
+
+  const handleCloseImagePreview = () => {
+    setPreviewingImage(null);
+  };
+
+  const currentPreviewImage = previewingImage 
+    ? images.find(img => img.name === previewingImage)
+    : null;
+
   return (
     <Card id="editor-panel-root" className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm h-full">
       <PanelToolbar
@@ -105,16 +118,25 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
             onImageUpload={onImageUpload}
             onImageDelete={onImageDelete}
             onImageRename={onImageRename}
+            onImageSelect={handleImageSelect}
           />
         )}
         
         <div className="flex-1 min-h-0">
-          <CodeEditor
-            language={getLanguageFromFileName(activeFile)}
-            value={files[activeFile] || ''}
-            onChange={(value) => onFileUpdate(activeFile, value)}
-            className="h-full w-full"
-          />
+          {currentPreviewImage ? (
+            <ImagePreview
+              imageName={currentPreviewImage.name}
+              imageUrl={currentPreviewImage.url}
+              onClose={handleCloseImagePreview}
+            />
+          ) : (
+            <CodeEditor
+              language={getLanguageFromFileName(activeFile)}
+              value={files[activeFile] || ''}
+              onChange={(value) => onFileUpdate(activeFile, value)}
+              className="h-full w-full"
+            />
+          )}
         </div>
       </div>
     </Card>
