@@ -19,7 +19,7 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
   onDownloadProject
 }) => {
   return <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10 shadow-lg">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-4 text-gray-50">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center space-x-2 sm:space-x-6">
             <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text shrink-0 text-slate-950">html-editor</h1>
