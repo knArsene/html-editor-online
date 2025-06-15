@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CodeEditor } from '@/components/CodeEditor';
-import { PreviewFrame } from '@/components/PreviewFrame';
-import { Play, Download, RefreshCw, Code, Eye } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+
+import React, { useState } from 'react';
+import { IDEHeader } from '@/components/IDEHeader';
+import { EditorSection } from '@/components/EditorSection';
+import { PreviewSection } from '@/components/PreviewSection';
 
 interface FileContent {
   html: string;
@@ -271,133 +267,28 @@ ${jsTag}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10 shadow-lg">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Web IDE
-              </h1>
-              <Select value={mode} onValueChange={(value: 'single' | 'split') => setMode(value)}>
-                <SelectTrigger className="w-44 bg-secondary border-border hover:bg-accent transition-colors text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border text-popover-foreground">
-                  <SelectItem value="single">Single File Mode</SelectItem>
-                  <SelectItem value="split">Split Files Mode</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <Button onClick={runCode} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg">
-                <Play className="w-4 h-4 mr-2" />
-                Run Code
-              </Button>
-              <Button onClick={resetCode} variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:text-orange-300 transition-colors">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Reset
-              </Button>
-              <Button onClick={downloadProject} variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 hover:text-blue-300 transition-colors">
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </div>
+      <IDEHeader
+        mode={mode}
+        onModeChange={setMode}
+        onRunCode={runCode}
+        onResetCode={resetCode}
+        onDownloadProject={downloadProject}
+      />
 
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-[calc(100vh-140px)]">
-          {/* Code Editor Section */}
-          <Card className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center justify-between p-4 border-b border-border bg-card/80">
-              <div className="flex items-center space-x-3">
-                <Code className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-semibold text-foreground">Code Editor</h2>
-              </div>
-              <div className="flex space-x-2">
-                <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
-              </div>
-            </div>
-            
-            <div className="flex-1 flex flex-col">
-              {mode === 'single' ? (
-                <CodeEditor
-                  language="html"
-                  value={files.html}
-                  onChange={(value) => updateFile('html', value)}
-                  className="flex-1"
-                />
-              ) : (
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-                  <TabsList className="bg-muted border-b border-border rounded-none p-1">
-                    <TabsTrigger value="html" className="text-muted-foreground data-[state=active]:bg-orange-500 data-[state=active]:text-white font-medium px-4">
-                      HTML
-                    </TabsTrigger>
-                    <TabsTrigger value="css" className="text-muted-foreground data-[state=active]:bg-blue-500 data-[state=active]:text-white font-medium px-4">
-                      CSS
-                    </TabsTrigger>
-                    <TabsTrigger value="js" className="text-muted-foreground data-[state=active]:bg-purple-500 data-[state=active]:text-white font-medium px-4">
-                      JavaScript
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="html" className="flex-1 m-0">
-                    <CodeEditor
-                      language="html"
-                      value={files.html}
-                      onChange={(value) => updateFile('html', value)}
-                      className="h-full"
-                    />
-                  </TabsContent>
-                  
-                  <TabsContent value="css" className="flex-1 m-0">
-                    <CodeEditor
-                      language="css"
-                      value={files.css}
-                      onChange={(value) => updateFile('css', value)}
-                      className="h-full"
-                    />
-                  </TabsContent>
-                  
-                  <TabsContent value="js" className="flex-1 m-0">
-                    <CodeEditor
-                      language="javascript"
-                      value={files.js}
-                      onChange={(value) => updateFile('js', value)}
-                      className="h-full"
-                    />
-                  </TabsContent>
-                </Tabs>
-              )}
-            </div>
-          </Card>
+          <EditorSection
+            mode={mode}
+            files={files}
+            activeTab={activeTab}
+            onActiveTabChange={setActiveTab}
+            onFileUpdate={updateFile}
+          />
 
-          {/* Preview Section */}
-          <Card className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center justify-between p-4 border-b border-border bg-card/80">
-              <div className="flex items-center space-x-3">
-                <Eye className="w-5 h-5 text-green-400" />
-                <h2 className="text-lg font-semibold text-foreground">Live Preview</h2>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-sm"></div>
-                <span className="text-sm text-green-400 font-medium">Live</span>
-              </div>
-            </div>
-            
-            <div className="flex-1 p-4 bg-transparent">
-              <PreviewFrame
-                key={previewKey}
-                htmlContent={generateCombinedHTML()}
-                className="w-full h-full shadow-lg"
-              />
-            </div>
-          </Card>
+          <PreviewSection
+            htmlContent={generateCombinedHTML()}
+            previewKey={previewKey}
+          />
         </div>
       </div>
     </div>
