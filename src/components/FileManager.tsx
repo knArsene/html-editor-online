@@ -1,6 +1,8 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileText, FileCode, Plus, Trash2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { FileText, FileCode, Plus, Trash2, Edit2, Image, File } from 'lucide-react';
 
 interface FileManagerProps {
   files: string[];
@@ -8,6 +10,7 @@ interface FileManagerProps {
   onFileSelect: (file: string) => void;
   onFileCreate: () => void;
   onFileDelete: (file: string) => void;
+  onFileRename?: (oldName: string, newName: string) => void;
 }
 
 export const FileManager: React.FC<FileManagerProps> = ({
@@ -15,21 +18,81 @@ export const FileManager: React.FC<FileManagerProps> = ({
   activeFile,
   onFileSelect,
   onFileCreate,
-  onFileDelete
+  onFileDelete,
+  onFileRename
 }) => {
+  const [editingFile, setEditingFile] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+
   const getFileIcon = (filename: string) => {
-    const ext = filename.split('.').pop();
-    if (ext === 'html') return <FileCode className="w-4 h-4 text-orange-400" />;
-    if (ext === 'css') return <FileCode className="w-4 h-4 text-blue-400" />;
-    if (ext === 'js') return <FileCode className="w-4 h-4 text-yellow-400" />;
-    return <FileText className="w-4 h-4 text-gray-400" />;
+    const ext = filename.split('.').pop()?.toLowerCase();
+    const iconProps = { className: "w-4 h-4" };
+    
+    switch (ext) {
+      case 'html':
+        return <FileCode {...iconProps} style={{ color: '#e34c26' }} />;
+      case 'css':
+        return <FileCode {...iconProps} style={{ color: '#1572b6' }} />;
+      case 'js':
+        return <FileCode {...iconProps} style={{ color: '#f7df1e' }} />;
+      case 'ts':
+        return <FileCode {...iconProps} style={{ color: '#3178c6' }} />;
+      case 'json':
+        return <FileCode {...iconProps} style={{ color: '#ffd700' }} />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'svg':
+      case 'webp':
+        return <Image {...iconProps} style={{ color: '#4ade80' }} />;
+      case 'md':
+        return <FileText {...iconProps} style={{ color: '#ffffff' }} />;
+      default:
+        return <File {...iconProps} style={{ color: '#6b7280' }} />;
+    }
+  };
+
+  const handleEditStart = (filename: string) => {
+    setEditingFile(filename);
+    setEditValue(filename);
+  };
+
+  const handleEditSave = () => {
+    if (editingFile && editValue && editValue !== editingFile && onFileRename) {
+      onFileRename(editingFile, editValue);
+    }
+    setEditingFile(null);
+    setEditValue('');
+  };
+
+  const handleEditCancel = () => {
+    setEditingFile(null);
+    setEditValue('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleEditSave();
+    } else if (e.key === 'Escape') {
+      handleEditCancel();
+    }
   };
 
   return (
-    <div className="bg-muted border-b border-border p-3">
+    <div className="bg-muted/30 border-b border-border p-3">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-foreground">Files</h3>
-        <Button onClick={onFileCreate} size="icon" variant="default" className="h-7 w-7">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <FileCode className="w-4 h-4" />
+          Files
+        </h3>
+        <Button 
+          onClick={onFileCreate} 
+          size="icon" 
+          variant="ghost" 
+          className="h-7 w-7 hover:bg-accent"
+          title="Add new file"
+        >
           <Plus className="w-4 h-4" />
         </Button>
       </div>
@@ -38,29 +101,68 @@ export const FileManager: React.FC<FileManagerProps> = ({
         {files.map((file) => (
           <div
             key={file}
-            className={`flex items-center justify-between space-x-1 px-2 py-1 rounded text-xs cursor-pointer transition-colors group ${
+            className={`relative flex items-center justify-between space-x-1 px-3 py-2 rounded-md text-xs cursor-pointer transition-all duration-200 group border ${
               activeFile === file
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground border-transparent hover:border-border'
             }`}
           >
-            <div onClick={() => onFileSelect(file)} className="flex items-center space-x-1 flex-1">
-              {getFileIcon(file)}
-              <span>{file}</span>
-            </div>
-            {files.length > 1 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onFileDelete(file);
-                }}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
+            {editingFile === file ? (
+              <Input
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={handleEditSave}
+                className="h-6 text-xs px-1 min-w-20"
+                autoFocus
+              />
+            ) : (
+              <>
+                <div 
+                  onClick={() => onFileSelect(file)} 
+                  className="flex items-center space-x-2 flex-1 min-w-0"
+                >
+                  {getFileIcon(file)}
+                  <span className="truncate font-medium">{file}</span>
+                </div>
+                
+                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  {onFileRename && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditStart(file);
+                      }}
+                      className="p-1 text-muted-foreground hover:text-foreground hover:bg-accent rounded transition-colors"
+                      title="Rename file"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                  )}
+                  {files.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFileDelete(file);
+                      }}
+                      className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
+                      title="Delete file"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              </>
             )}
           </div>
         ))}
+      </div>
+      
+      <div className="mt-3 text-xs text-muted-foreground">
+        <p className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-green-400"></span>
+          Files are automatically linked based on references in your code
+        </p>
       </div>
     </div>
   );

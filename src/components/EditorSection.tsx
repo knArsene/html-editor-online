@@ -14,6 +14,7 @@ interface EditorSectionProps {
   onFileUpdate: (fileName: string, content: string) => void;
   onFileCreate: () => void;
   onFileDelete: (fileName: string) => void;
+  onFileRename?: (oldName: string, newName: string) => void;
 }
 
 export const EditorSection: React.FC<EditorSectionProps> = ({
@@ -23,7 +24,8 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
   onActiveFileChange,
   onFileUpdate,
   onFileCreate,
-  onFileDelete
+  onFileDelete,
+  onFileRename
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -59,6 +61,10 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
         return 'css';
       case 'js':
         return 'javascript';
+      case 'ts':
+        return 'typescript';
+      case 'json':
+        return 'json';
       default:
         return 'html';
     }
@@ -86,6 +92,7 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
             onFileSelect={onActiveFileChange}
             onFileCreate={onFileCreate}
             onFileDelete={onFileDelete}
+            onFileRename={onFileRename}
           />
         )}
         
