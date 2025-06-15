@@ -52,7 +52,7 @@ export const Info: React.FC = () => {
       <div className="space-y-16">
         {/* About */}
         <section
-          ref={(el) => (sectionRefs.current["about"] = el)}
+          ref={(el: HTMLDivElement | null) => (sectionRefs.current["about"] = el)}
           id="about"
           className="pt-8 -mt-8"
         >
@@ -63,7 +63,7 @@ export const Info: React.FC = () => {
         </section>
         {/* Blog */}
         <section
-          ref={(el) => (sectionRefs.current["blog"] = el)}
+          ref={(el: HTMLDivElement | null) => (sectionRefs.current["blog"] = el)}
           id="blog"
           className="pt-8 -mt-8"
         >
@@ -134,7 +134,7 @@ export const Info: React.FC = () => {
         </section>
         {/* Contact */}
         <section
-          ref={(el) => (sectionRefs.current["contact"] = el)}
+          ref={(el: HTMLDivElement | null) => (sectionRefs.current["contact"] = el)}
           id="contact"
           className="pt-8 -mt-8"
         >
@@ -145,7 +145,7 @@ export const Info: React.FC = () => {
         </section>
         {/* Terms */}
         <section
-          ref={(el) => (sectionRefs.current["terms"] = el)}
+          ref={(el: HTMLDivElement | null) => (sectionRefs.current["terms"] = el)}
           id="terms"
           className="pt-8 -mt-8"
         >
@@ -156,7 +156,7 @@ export const Info: React.FC = () => {
         </section>
         {/* Privacy Policy */}
         <section
-          ref={(el) => (sectionRefs.current["privacy"] = el)}
+          ref={(el: HTMLDivElement | null) => (sectionRefs.current["privacy"] = el)}
           id="privacy"
           className="pt-8 -mt-8"
         >
