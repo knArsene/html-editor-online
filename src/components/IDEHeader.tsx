@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Play, Download, RefreshCw } from 'lucide-react';
+import { Play, Download } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -25,7 +26,7 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center space-x-2 sm:space-x-6">
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent shrink-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground shrink-0">
               Html editor
             </h1>
             <Select value={mode} onValueChange={onModeChange}>
