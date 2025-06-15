@@ -16,7 +16,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
 }) => {
   // Handler: open live preview in a new tab at about:blank and write content into it
   const openPreviewInNewTab = () => {
-    const newWindow = window.open("about:blank", "_blank", "noopener,noreferrer");
+    // Remove 'noopener,noreferrer' so we can write to the new window
+    const newWindow = window.open("about:blank", "_blank");
     if (newWindow) {
       newWindow.document.open();
       newWindow.document.write(htmlContent);
