@@ -26,7 +26,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   const getFileIcon = (filename: string) => {
     const ext = filename.split('.').pop()?.toLowerCase();
-    const iconProps = { className: "w-4 h-4" };
+    const iconProps = { className: "w-3 h-3 flex-shrink-0" };
     
     switch (ext) {
       case 'html':
@@ -80,28 +80,28 @@ export const FileManager: React.FC<FileManagerProps> = ({
   };
 
   return (
-    <div className="bg-muted/30 border-b border-border p-3">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <FileCode className="w-4 h-4" />
+    <div className="bg-muted/20 border-b border-border px-3 py-2 min-h-[60px]">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+          <FileCode className="w-3 h-3" />
           Files
         </h3>
         <Button 
           onClick={onFileCreate} 
           size="icon" 
           variant="ghost" 
-          className="h-7 w-7 hover:bg-accent"
+          className="h-6 w-6 hover:bg-accent"
           title="Add new file"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3 h-3" />
         </Button>
       </div>
       
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1 items-center">
         {files.map((file) => (
           <div
             key={file}
-            className={`relative flex items-center justify-between space-x-1 px-3 py-2 rounded-md text-xs cursor-pointer transition-all duration-200 group border ${
+            className={`relative flex items-center justify-between min-w-0 max-w-[180px] px-2 py-1 rounded text-xs cursor-pointer transition-all duration-200 group border ${
               activeFile === file
                 ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground border-transparent hover:border-border'
@@ -113,30 +113,30 @@ export const FileManager: React.FC<FileManagerProps> = ({
                 onChange={(e) => setEditValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onBlur={handleEditSave}
-                className="h-6 text-xs px-1 min-w-20"
+                className="h-5 text-xs px-1 min-w-16 w-full"
                 autoFocus
               />
             ) : (
               <>
                 <div 
                   onClick={() => onFileSelect(file)} 
-                  className="flex items-center space-x-2 flex-1 min-w-0"
+                  className="flex items-center gap-1.5 flex-1 min-w-0"
                 >
                   {getFileIcon(file)}
-                  <span className="truncate font-medium">{file}</span>
+                  <span className="truncate font-medium text-xs">{file}</span>
                 </div>
                 
-                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-1">
                   {onFileRename && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditStart(file);
                       }}
-                      className="p-1 text-muted-foreground hover:text-foreground hover:bg-accent rounded transition-colors"
+                      className="p-0.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded transition-colors"
                       title="Rename file"
                     >
-                      <Edit2 className="w-3 h-3" />
+                      <Edit2 className="w-2.5 h-2.5" />
                     </button>
                   )}
                   {files.length > 1 && (
@@ -145,10 +145,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
                         e.stopPropagation();
                         onFileDelete(file);
                       }}
-                      className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
+                      className="p-0.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
                       title="Delete file"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-2.5 h-2.5" />
                     </button>
                   )}
                 </div>
@@ -156,13 +156,6 @@ export const FileManager: React.FC<FileManagerProps> = ({
             )}
           </div>
         ))}
-      </div>
-      
-      <div className="mt-3 text-xs text-muted-foreground">
-        <p className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-green-400"></span>
-          Files are automatically linked based on references in your code
-        </p>
       </div>
     </div>
   );
