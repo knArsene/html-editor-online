@@ -6,6 +6,7 @@ import { ImagePreview } from '@/components/ImagePreview';
 import { PanelToolbar } from "@/components/PanelToolbar";
 import { FileManager } from "@/components/FileManager";
 import { Code } from "lucide-react";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EditorSectionProps {
   mode: 'single' | 'split';
@@ -37,6 +38,8 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
   onImageRename
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const isMobile = useIsMobile();
+  
   // We'll use one "active" key that holds either file or image name, and a flag
   const [activePreview, setActivePreview] = useState<{ type: "file" | "image", name: string }>({
     type: "file",
@@ -115,14 +118,14 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
   return (
     <Card id="editor-panel-root" className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm h-full">
       <PanelToolbar
-        icon={<Code className="w-5 h-5 text-blue-400" />}
+        icon={<Code className={`text-blue-400 ${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />}
         title="Code Editor"
-        onFullscreen={toggleEditorFullscreen}
+        onFullscreen={!isMobile ? toggleEditorFullscreen : undefined}
       >
-        <div className="flex space-x-2">
-          <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-          <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
-          <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
+        <div className={`flex ${isMobile ? 'space-x-1' : 'space-x-2'}`}>
+          <div className={`rounded-full bg-red-500 shadow-sm ${isMobile ? 'w-2 h-2' : 'w-3 h-3'}`}></div>
+          <div className={`rounded-full bg-yellow-500 shadow-sm ${isMobile ? 'w-2 h-2' : 'w-3 h-3'}`}></div>
+          <div className={`rounded-full bg-green-500 shadow-sm ${isMobile ? 'w-2 h-2' : 'w-3 h-3'}`}></div>
         </div>
       </PanelToolbar>
       <div className="flex-1 flex flex-col min-h-0">
@@ -161,5 +164,3 @@ export const EditorSection: React.FC<EditorSectionProps> = ({
     </Card>
   );
 };
-
-// END

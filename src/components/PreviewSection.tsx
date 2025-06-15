@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { PreviewFrame } from '@/components/PreviewFrame';
 import { Eye } from 'lucide-react';
 import { PanelToolbar } from "@/components/PanelToolbar";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PreviewSectionProps {
   htmlContent: string;
@@ -14,6 +15,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   htmlContent,
   previewKey
 }) => {
+  const isMobile = useIsMobile();
+
   // Handler: open live preview in a new tab at about:blank and write content into it
   const openPreviewInNewTab = () => {
     // Remove 'noopener,noreferrer' so we can write to the new window
@@ -28,16 +31,16 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   return (
     <Card className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm h-full">
       <PanelToolbar
-        icon={<Eye className="w-5 h-5 text-green-400" />}
+        icon={<Eye className={`text-green-400 ${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />}
         title="Live Preview"
-        onFullscreen={openPreviewInNewTab}
+        onFullscreen={!isMobile ? openPreviewInNewTab : undefined}
       >
         <div className="flex items-center space-x-2">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-sm"></div>
-          <span className="text-sm text-green-400 font-medium">Live</span>
+          <div className={`rounded-full bg-green-400 animate-pulse shadow-sm ${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'}`}></div>
+          <span className={`text-green-400 font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>Live</span>
         </div>
       </PanelToolbar>
-      <div className="flex-1 p-4 bg-transparent min-h-0">
+      <div className={`flex-1 bg-transparent min-h-0 ${isMobile ? 'p-2' : 'p-4'}`}>
         <PreviewFrame
           key={previewKey}
           htmlContent={htmlContent}

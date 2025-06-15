@@ -1,7 +1,9 @@
+
 import React, { Suspense, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Footer } from '@/components/Footer';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Lazy-load panels for faster initial load
 const EditorPanel = React.lazy(() => import('./IDE/EditorPanel').then(m => ({ default: m.EditorPanel })));
@@ -130,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 const IDE = () => {
   const [mode, setMode] = useState<'single' | 'split'>('single');
+  const isMobile = useIsMobile();
   
   // Separate state for each mode
   const [singleModeFiles, setSingleModeFiles] = useState<FileContent>(INITIAL_SINGLE_FILE);
@@ -286,23 +289,6 @@ console.log('New JavaScript file created');`;
     }
   };
 
-  // Remove the old createFile function with the prompt:
-  // const createFile = () => {
-  //   const fileName = prompt('Enter file name with extension (e.g., "about.html", "theme.css", "utils.js", "data.json"):');
-  //   if (fileName && fileName.trim() && !files[fileName]) {
-  //     const content = getFileTemplate(fileName);
-  //     if (mode === 'single') {
-  //       setSingleModeFiles(prev => ({ ...prev, [fileName]: content }));
-  //       setSingleModeActiveFile(fileName);
-  //     } else {
-  //       setSplitModeFiles(prev => ({ ...prev, [fileName]: content }));
-  //       setSplitModeActiveFile(fileName);
-  //     }
-  //   } else if (files[fileName]) {
-  //     alert('A file with this name already exists!');
-  //   }
-  // };
-
   const renameFile = (oldName: string, newName: string) => {
     if (newName && newName.trim() && newName !== oldName && !files[newName]) {
       const content = files[oldName];
@@ -426,52 +412,96 @@ console.log('New JavaScript file created');`;
         onDownloadProject={downloadProject}
       />
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="h-[calc(100vh-194px)] flex gap-6">
-          <ResizablePanelGroup direction="horizontal" className="min-h-full flex-1">
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <Suspense fallback={
-                <div className="flex items-center justify-center h-full">
-                  <div className="w-10 h-10 rounded-full border-4 border-blue-400 border-t-transparent animate-spin mr-2" />
-                  <span className="text-muted-foreground">Loading editor...</span>
-                </div>
-              }>
-                <EditorPanel
-                  mode={mode}
-                  files={files}
-                  images={images}
-                  activeFile={activeFile}
-                  onActiveFileChange={setActiveFile}
-                  onFileUpdate={updateFile}
-                  onFileCreate={handleCreateFile}
-                  onFileDelete={deleteFile}
-                  onFileRename={renameFile}
-                  onImageUpload={handleImageUpload}
-                  onImageDelete={handleImageDelete}
-                  onImageRename={handleImageRename}
-                />
-              </Suspense>
-            </ResizablePanel>
+      <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-6">
+        <div className={`flex ${isMobile ? 'flex-col' : 'gap-6'} ${isMobile ? 'h-[calc(100vh-120px)]' : 'h-[calc(100vh-194px)]'}`}>
+          {isMobile ? (
+            // Mobile: Stack vertically
+            <div className="flex flex-col h-full gap-3">
+              <div className="h-1/2 min-h-[300px]">
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-full">
+                    <div className="w-8 h-8 rounded-full border-4 border-blue-400 border-t-transparent animate-spin mr-2" />
+                    <span className="text-muted-foreground text-sm">Loading editor...</span>
+                  </div>
+                }>
+                  <EditorPanel
+                    mode={mode}
+                    files={files}
+                    images={images}
+                    activeFile={activeFile}
+                    onActiveFileChange={setActiveFile}
+                    onFileUpdate={updateFile}
+                    onFileCreate={handleCreateFile}
+                    onFileDelete={deleteFile}
+                    onFileRename={renameFile}
+                    onImageUpload={handleImageUpload}
+                    onImageDelete={handleImageDelete}
+                    onImageRename={handleImageRename}
+                  />
+                </Suspense>
+              </div>
 
-            <ResizableHandle 
-              withHandle 
-              className="w-2 bg-transparent hover:bg-blue-500/20 transition-colors border-l border-transparent hover:border-blue-500 group"
-            />
+              <div className="h-1/2 min-h-[300px]">
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-full">
+                    <div className="w-6 h-6 rounded-full border-4 border-green-400 border-t-transparent animate-spin mr-2" />
+                    <span className="text-green-500/80 text-sm">Loading preview...</span>
+                  </div>
+                }>
+                  <PreviewPanel
+                    htmlContent={generateCombinedHTML()}
+                    previewKey={previewKey}
+                  />
+                </Suspense>
+              </div>
+            </div>
+          ) : (
+            // Desktop: Side by side with resizable panels
+            <ResizablePanelGroup direction="horizontal" className="min-h-full flex-1">
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-full">
+                    <div className="w-10 h-10 rounded-full border-4 border-blue-400 border-t-transparent animate-spin mr-2" />
+                    <span className="text-muted-foreground">Loading editor...</span>
+                  </div>
+                }>
+                  <EditorPanel
+                    mode={mode}
+                    files={files}
+                    images={images}
+                    activeFile={activeFile}
+                    onActiveFileChange={setActiveFile}
+                    onFileUpdate={updateFile}
+                    onFileCreate={handleCreateFile}
+                    onFileDelete={deleteFile}
+                    onFileRename={renameFile}
+                    onImageUpload={handleImageUpload}
+                    onImageDelete={handleImageDelete}
+                    onImageRename={handleImageRename}
+                  />
+                </Suspense>
+              </ResizablePanel>
 
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <Suspense fallback={
-                <div className="flex items-center justify-center h-full">
-                  <div className="w-8 h-8 rounded-full border-4 border-green-400 border-t-transparent animate-spin mr-2" />
-                  <span className="text-green-500/80">Loading preview...</span>
-                </div>
-              }>
-                <PreviewPanel
-                  htmlContent={generateCombinedHTML()}
-                  previewKey={previewKey}
-                />
-              </Suspense>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+              <ResizableHandle 
+                withHandle 
+                className="w-2 bg-transparent hover:bg-blue-500/20 transition-colors border-l border-transparent hover:border-blue-500 group"
+              />
+
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-full">
+                    <div className="w-8 h-8 rounded-full border-4 border-green-400 border-t-transparent animate-spin mr-2" />
+                    <span className="text-green-500/80">Loading preview...</span>
+                  </div>
+                }>
+                  <PreviewPanel
+                    htmlContent={generateCombinedHTML()}
+                    previewKey={previewKey}
+                  />
+                </Suspense>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          )}
         </div>
       </div>
       <Footer />
