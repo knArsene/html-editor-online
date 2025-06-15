@@ -1,3 +1,4 @@
+
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,7 +20,6 @@ const App = () => (
         <BrowserRouter>
           <ErrorBoundary>
             <Routes>
-              {/* Render IDE for all routes except /info */}
               <Route path="info" element={<Info />} />
               <Route path="*" element={<IDE />} />
             </Routes>
