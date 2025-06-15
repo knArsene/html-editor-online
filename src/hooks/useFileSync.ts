@@ -1,28 +1,45 @@
 import { useState, useRef } from "react";
 
 export interface FileContent {
-  html: string; // Will hold the <body> contents only in split mode
+  html: string; // Only <body> content in split mode
   css: string;
   js: string;
-  headContent?: string; // New: stores <meta>, <link>, etc.
+  headContent?: string; // Stores <meta>, <link>, etc.
+  externalResources?: string; // Explicitly stores ALL meta/link/title etc from <head>
 }
 
-// Extract <head> stuff, <style>, <script>, and <body> content from HTML
+// Improved extraction: collects and preserves all external head resources
 function extractCodeFromHTML(html: string) {
-  // 1. Extract <head> inner content (to keep meta/link/font)
+  // 1. Extract <head> content exactly
   let headContent = "";
+  let externalResources = "";
   const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
   if (headMatch) {
-    headContent = headMatch[1]
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "") // drop embedded CSS
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ""); // drop embedded JS
+    headContent = headMatch[1];
+
+    // Extract all <meta>, <link>, <title> from <head>
+    const resourceRegex = /(<meta[\s\S]*?>|<link[\s\S]*?>|<title>[\s\S]*?<\/title>)/gi;
+    const resources = headContent.match(resourceRegex);
+    if (resources) {
+      externalResources = resources.join("\n");
+    }
+    // Remove style and script blocks so only naked resources remain in headContent
+    headContent = headContent
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(resourceRegex, "")
+      .trim();
   } else {
-    // If no <head>, try to extract all <meta>, <link>, and <title> from anywhere
-    const metaMatches = html.match(/<(meta|link|title)[^>]*>[\s\S]*?<\/?title>?/gi);
-    if (metaMatches) headContent = metaMatches.join("\n");
+    // No <head>? Try to extract all <meta>, <link>, <title> from anywhere
+    const resourceRegex = /(<meta[\s\S]*?>|<link[\s\S]*?>|<title>[\s\S]*?<\/title>)/gi;
+    const resources = html.match(resourceRegex);
+    if (resources) {
+      externalResources = resources.join("\n");
+    }
   }
+
   // 2. Extract all <style>
-  const styleBlocks = [];
+  let styleBlocks = [];
   const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
   let styleMatch;
   while ((styleMatch = styleRegex.exec(html)) !== null) {
@@ -31,7 +48,7 @@ function extractCodeFromHTML(html: string) {
   const css = styleBlocks.join('\n\n');
 
   // 3. Extract all <script>
-  const scriptBlocks = [];
+  let scriptBlocks = [];
   const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
   let scriptMatch;
   while ((scriptMatch = scriptRegex.exec(html)) !== null) {
@@ -39,13 +56,13 @@ function extractCodeFromHTML(html: string) {
   }
   const js = scriptBlocks.join('\n\n');
 
-  // 4. Extract <body> content, or fallback to everything inside <html> if no <body>
+  // 4. Extract <body> content (or everything minus head/style/script)
   let bodyContent = "";
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   if (bodyMatch) {
     bodyContent = bodyMatch[1].trim();
   } else {
-    // fallback: use all content minus <head>, <style>, <script>
+    // Fallback: remove head/style/script from all HTML
     let tempHtml = html
       .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
@@ -57,29 +74,37 @@ function extractCodeFromHTML(html: string) {
     html: bodyContent,
     css,
     js,
-    headContent,
+    headContent: headContent.trim(),
+    externalResources: externalResources.trim()
   };
 }
 
-// Reconstruct full HTML with preserved <head> info, merged <style>, and <script>
-function mergeToHTML(html: string, css: string, js: string, headContent?: string) {
-  // Build the head: keep <meta>, <link>, etc
-  let head = headContent ? headContent.trim() : "";
+// Robust merge: headContent is optional, externalResources always re-injected
+function mergeToHTML(html: string, css: string, js: string, headContent?: string, externalResources?: string) {
+  let head = "";
 
-  // Insert CSS in head
-  if (css.trim()) {
-    head += `\n<style>\n${css}\n</style>\n`;
+  // 1. Insert meta/link/title resources first
+  if (externalResources && externalResources.trim()) {
+    head += externalResources.trim() + "\n";
   }
 
-  // Always add a title if missing
+  // 2. Add any remaining raw headContent (extra, like custom tags)
+  if (headContent && headContent.trim()) {
+    head += headContent.trim() + "\n";
+  }
+
+  // 3. Then insert all CSS in <style>
+  if (css && css.trim()) {
+    head += `<style>\n${css}\n</style>\n`;
+  }
+
+  // 4. Always add a title if missing
   if (!/title>/i.test(head)) {
     head += `<title>Web Project</title>\n`;
   }
 
-  // Prepare the <body> (from html param)
+  // 5. Build body and add JS at end
   let body = html || "";
-
-  //  Compose as proper document
   let output = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,7 +114,7 @@ ${head}
 ${body}
 `;
 
-  if (js.trim()) {
+  if (js && js.trim()) {
     output += `<script>\n${js}\n</script>\n`;
   }
   output += `</body>\n</html>`;
@@ -98,17 +123,19 @@ ${body}
 
 export function useFileSync(initialFiles: FileContent, initialMode: "single" | "split") {
   // Maintain master file content
-  const [files, setFiles] = useState<FileContent>(initialFiles);
+  const [files, setFiles] = useState<FileContent>({
+    ...initialFiles,
+    ...extractCodeFromHTML(initialFiles.html)
+  });
   const [mode, setMode] = useState<"single" | "split">(initialMode);
 
-  // Keep the last "split" and "single" representations
+  // Track last split/single representations
   const lastSplit = useRef<FileContent>(extractCodeFromHTML(initialFiles.html));
   const lastSingle = useRef<string>(initialFiles.html);
 
-  // Sync logic: when updating any file, keep both representations updated.
+  // Update file, keeping all head resources safe
   const updateFile = (type: keyof FileContent, content: string) => {
     if (mode === "single") {
-      // Update HTML directly and parse out to split as well
       setFiles((prev) => {
         const updated = { ...prev, html: content };
         const parsed = extractCodeFromHTML(content);
@@ -117,43 +144,48 @@ export function useFileSync(initialFiles: FileContent, initialMode: "single" | "
         return { ...parsed, html: content };
       });
     } else {
-      // Update split and merge to single
       setFiles((prev) => {
         const updated = { ...prev, [type]: content };
-        // Use lastSplit.current.headContent or prev.headContent for <head>
-        const headContent =
-          typeof files.headContent === 'string'
-            ? files.headContent
-            : lastSplit.current.headContent || "";
+        // Use externalResources always
+        const externalResources =
+          typeof files.externalResources === "string"
+            ? files.externalResources
+            : lastSplit.current.externalResources || "";
         const single = mergeToHTML(
           updated.html,
           updated.css,
           updated.js,
-          headContent
+          files.headContent || lastSplit.current.headContent || "",
+          externalResources
         );
-        lastSplit.current = { ...updated, headContent };
+        lastSplit.current = { ...updated, headContent: files.headContent, externalResources };
         lastSingle.current = single;
-        return { ...updated, headContent };
+        return { ...updated, headContent: files.headContent, externalResources };
       });
     }
   };
 
-  // When mode changes, sync files accordingly
+  // Handle mode switch, always keep resources
   const handleModeChange = (newMode: "single" | "split") => {
     setMode(newMode);
     setFiles((prev) => {
       if (newMode === "single") {
-        // Combine split files into a single HTML file
         const merged = mergeToHTML(
           prev.html,
           prev.css,
           prev.js,
-          prev.headContent
+          prev.headContent,
+          prev.externalResources
         );
         lastSingle.current = merged;
-        return { html: merged, css: prev.css, js: prev.js, headContent: prev.headContent };
+        return {
+          html: merged,
+          css: prev.css,
+          js: prev.js,
+          headContent: prev.headContent,
+          externalResources: prev.externalResources,
+        };
       } else {
-        // Split the single HTML file into individual parts
         const parsed = extractCodeFromHTML(prev.html);
         lastSplit.current = parsed;
         return { ...parsed };
