@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { IDEHeader } from '@/components/IDEHeader';
 import { EditorSection } from '@/components/EditorSection';
 import { PreviewSection } from '@/components/PreviewSection';
+import { useFileSync } from "@/hooks/useFileSync";
 
 interface FileContent {
   html: string;
@@ -10,9 +10,8 @@ interface FileContent {
   js: string;
 }
 
-const IDE = () => {
-  const [files, setFiles] = useState<FileContent>({
-    html: `<!DOCTYPE html>
+const INITIAL_FILES = {
+  html: `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -116,7 +115,7 @@ const IDE = () => {
     </script>
 </body>
 </html>`,
-    css: `body {
+  css: `body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 20px;
@@ -180,7 +179,7 @@ button:hover {
   align-items: center;
   justify-content: center;
 }`,
-    js: `function changeColor() {
+  js: `function changeColor() {
   const colors = [
     'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
     'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
@@ -205,41 +204,24 @@ button:hover {
   document.body.style.background = randomColor;
   document.getElementById('output').innerHTML = \`<p style="font-size: 1.1em; font-weight: bold;">\${randomMessage}</p>\`;
 }`
-  });
+};
 
-  const [mode, setMode] = useState<'single' | 'split'>('single');
-  const [activeTab, setActiveTab] = useState('html');
+const IDE = () => {
+  // Use custom hook for file sync
+  const {
+    files,
+    setFiles: updateFile,
+    mode,
+    setMode
+  } = useFileSync(INITIAL_FILES, "single");
+
+  const [activeTab, setActiveTab] = useState("html");
   const [previewKey, setPreviewKey] = useState(0);
 
-  const updateFile = (type: keyof FileContent, content: string) => {
-    setFiles(prev => ({
-      ...prev,
-      [type]: content
-    }));
-  };
+  const runCode = () => setPreviewKey(prev => prev + 1);
 
-  const runCode = () => {
-    setPreviewKey(prev => prev + 1);
-  };
-
-  const generateCombinedHTML = () => {
-    if (mode === 'single') {
-      return files.html;
-    } else {
-      // Split mode - combine files
-      const htmlWithoutClosingTags = files.html.replace(/<\/head>|<\/body>|<\/html>/gi, '');
-      const cssTag = files.css.trim() ? `<style>\n${files.css}\n</style>` : '';
-      const jsTag = files.js.trim() ? `<script>\n${files.js}\n</script>` : '';
-      
-      return `${htmlWithoutClosingTags}
-${cssTag}
-</head>
-<body>
-${jsTag}
-</body>
-</html>`;
-    }
-  };
+  // Always generate combined HTML for preview/download
+  const generateCombinedHTML = () => files.html;
 
   const downloadProject = () => {
     const htmlContent = generateCombinedHTML();
@@ -256,11 +238,9 @@ ${jsTag}
 
   const resetCode = () => {
     if (confirm('Are you sure you want to reset all code? This action cannot be undone.')) {
-      setFiles({
-        html: '',
-        css: '',
-        js: ''
-      });
+      updateFile("html", "");
+      updateFile("css", "");
+      updateFile("js", "");
       setPreviewKey(prev => prev + 1);
     }
   };
