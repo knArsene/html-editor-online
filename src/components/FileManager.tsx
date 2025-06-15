@@ -201,7 +201,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               item.isActive
                 ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                 : item.type === 'image'
-                ? 'text-muted-foreground hover:bg-green-50 hover:text-green-700 border-transparent hover:border-green-200'
+                ? 'text-muted-foreground hover:bg-green-50 dark:hover:bg-green-900 hover:text-green-700 dark:hover:text-green-200 border-transparent hover:border-green-200'
                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground border-transparent hover:border-border'
             }`}
           >
@@ -211,7 +211,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
                 onChange={(e) => setEditValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onBlur={handleEditSave}
-                className="h-5 text-xs px-1 min-w-16 w-full"
+                className="h-5 text-xs px-1 min-w-16 w-full
+                  bg-background text-foreground
+                  border border-border
+                  placeholder:text-muted-foreground
+                  focus:outline-none focus:ring-2 focus:ring-blue-400
+                  transition-all
+                  dark:bg-background dark:text-foreground dark:placeholder:text-muted-foreground"
                 autoFocus
               />
             ) : (
