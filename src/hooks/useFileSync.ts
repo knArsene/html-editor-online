@@ -1,13 +1,27 @@
 import { useState, useRef } from "react";
 
 export interface FileContent {
-  html: string;
+  html: string; // Will hold the <body> contents only in split mode
   css: string;
   js: string;
+  headContent?: string; // New: stores <meta>, <link>, etc.
 }
 
+// Extract <head> stuff, <style>, <script>, and <body> content from HTML
 function extractCodeFromHTML(html: string) {
-  // Get all <style> contents, join together
+  // 1. Extract <head> inner content (to keep meta/link/font)
+  let headContent = "";
+  const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+  if (headMatch) {
+    headContent = headMatch[1]
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "") // drop embedded CSS
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ""); // drop embedded JS
+  } else {
+    // If no <head>, try to extract all <meta>, <link>, and <title> from anywhere
+    const metaMatches = html.match(/<(meta|link|title)[^>]*>[\s\S]*?<\/?title>?/gi);
+    if (metaMatches) headContent = metaMatches.join("\n");
+  }
+  // 2. Extract all <style>
   const styleBlocks = [];
   const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
   let styleMatch;
@@ -16,7 +30,7 @@ function extractCodeFromHTML(html: string) {
   }
   const css = styleBlocks.join('\n\n');
 
-  // Get all <script> contents, join together
+  // 3. Extract all <script>
   const scriptBlocks = [];
   const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
   let scriptMatch;
@@ -25,44 +39,61 @@ function extractCodeFromHTML(html: string) {
   }
   const js = scriptBlocks.join('\n\n');
 
-  // remove <style> and <script> blocks
-  let cleanHtml = html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
-
-  // handle empty lines caused by removals
-  cleanHtml = cleanHtml.replace(/^\s*[\r\n]/gm, "");
+  // 4. Extract <body> content, or fallback to everything inside <html> if no <body>
+  let bodyContent = "";
+  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  if (bodyMatch) {
+    bodyContent = bodyMatch[1].trim();
+  } else {
+    // fallback: use all content minus <head>, <style>, <script>
+    let tempHtml = html
+      .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
+    bodyContent = tempHtml.replace(/^\s*[\r\n]/gm, "").trim();
+  }
 
   return {
-    html: cleanHtml,
+    html: bodyContent,
     css,
     js,
+    headContent,
   };
 }
 
-function mergeToHTML(html: string, css: string, js: string) {
-  // Ensure <head> and <body> exist
-  let merged = html;
+// Reconstruct full HTML with preserved <head> info, merged <style>, and <script>
+function mergeToHTML(html: string, css: string, js: string, headContent?: string) {
+  // Build the head: keep <meta>, <link>, etc
+  let head = headContent ? headContent.trim() : "";
 
-  // Insert CSS in <head>
+  // Insert CSS in head
   if (css.trim()) {
-    if (/<head[^>]*>/i.test(merged)) {
-      merged = merged.replace(/<head([^>]*)>/i, `<head$1>\n<style>\n${css}\n</style>`);
-    } else {
-      merged = merged.replace(/<html([^>]*)>/i, `<html$1><head><style>\n${css}\n</style></head>`);
-    }
+    head += `\n<style>\n${css}\n</style>\n`;
   }
 
-  // Insert JS before </body> (or at end)
+  // Always add a title if missing
+  if (!/title>/i.test(head)) {
+    head += `<title>Web Project</title>\n`;
+  }
+
+  // Prepare the <body> (from html param)
+  let body = html || "";
+
+  //  Compose as proper document
+  let output = `<!DOCTYPE html>
+<html lang="en">
+<head>
+${head}
+</head>
+<body>
+${body}
+`;
+
   if (js.trim()) {
-    if (/<\/body>/.test(merged)) {
-      merged = merged.replace(/<\/body>/i, `<script>\n${js}\n</script>\n</body>`);
-    } else {
-      merged = merged + `\n<script>\n${js}\n</script>`;
-    }
+    output += `<script>\n${js}\n</script>\n`;
   }
-
-  return merged;
+  output += `</body>\n</html>`;
+  return output;
 }
 
 export function useFileSync(initialFiles: FileContent, initialMode: "single" | "split") {
@@ -89,10 +120,20 @@ export function useFileSync(initialFiles: FileContent, initialMode: "single" | "
       // Update split and merge to single
       setFiles((prev) => {
         const updated = { ...prev, [type]: content };
-        const single = mergeToHTML(updated.html, updated.css, updated.js);
-        lastSplit.current = updated;
+        // Use lastSplit.current.headContent or prev.headContent for <head>
+        const headContent =
+          typeof files.headContent === 'string'
+            ? files.headContent
+            : lastSplit.current.headContent || "";
+        const single = mergeToHTML(
+          updated.html,
+          updated.css,
+          updated.js,
+          headContent
+        );
+        lastSplit.current = { ...updated, headContent };
         lastSingle.current = single;
-        return updated;
+        return { ...updated, headContent };
       });
     }
   };
@@ -103,14 +144,19 @@ export function useFileSync(initialFiles: FileContent, initialMode: "single" | "
     setFiles((prev) => {
       if (newMode === "single") {
         // Combine split files into a single HTML file
-        const merged = mergeToHTML(prev.html, prev.css, prev.js);
+        const merged = mergeToHTML(
+          prev.html,
+          prev.css,
+          prev.js,
+          prev.headContent
+        );
         lastSingle.current = merged;
-        return { html: merged, css: prev.css, js: prev.js };
+        return { html: merged, css: prev.css, js: prev.js, headContent: prev.headContent };
       } else {
         // Split the single HTML file into individual parts
         const parsed = extractCodeFromHTML(prev.html);
         lastSplit.current = parsed;
-        return { html: parsed.html, css: parsed.css, js: parsed.js };
+        return { ...parsed };
       }
     });
   };
