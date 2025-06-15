@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { IDEHeader } from '@/components/IDEHeader';
 import { EditorSection } from '@/components/EditorSection';
 import { PreviewSection } from '@/components/PreviewSection';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 interface FileContent {
   [fileName: string]: string;
@@ -178,21 +180,43 @@ const IDE = () => {
       />
 
       <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-[calc(100vh-140px)]">
-          <EditorSection
-            mode={mode}
-            files={files}
-            activeFile={activeFile}
-            onActiveFileChange={setActiveFile}
-            onFileUpdate={updateFile}
-            onFileCreate={createFile}
-            onFileDelete={deleteFile}
-          />
-
-          <PreviewSection
-            htmlContent={generateCombinedHTML()}
-            previewKey={previewKey}
-          />
+        <div className="h-[calc(100vh-140px)]">
+          <ResizablePanelGroup 
+            direction="horizontal" 
+            className="rounded-lg border border-border"
+          >
+            <ResizablePanel 
+              defaultSize={50} 
+              minSize={30}
+              className="min-w-0"
+            >
+              <EditorSection
+                mode={mode}
+                files={files}
+                activeFile={activeFile}
+                onActiveFileChange={setActiveFile}
+                onFileUpdate={updateFile}
+                onFileCreate={createFile}
+                onFileDelete={deleteFile}
+              />
+            </ResizablePanel>
+            
+            <ResizableHandle 
+              withHandle={false}
+              className="w-1 bg-transparent hover:bg-blue-500 transition-colors duration-200 data-[resize-handle-state=hover]:bg-blue-500 data-[resize-handle-state=drag]:bg-blue-500 relative group"
+            />
+            
+            <ResizablePanel 
+              defaultSize={50} 
+              minSize={30}
+              className="min-w-0"
+            >
+              <PreviewSection
+                htmlContent={generateCombinedHTML()}
+                previewKey={previewKey}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </div>
       </div>
     </div>
