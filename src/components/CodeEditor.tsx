@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -88,7 +87,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, [value, language]);
 
   return (
-    <div className={cn("relative flex-1 overflow-hidden bg-gray-900", className)}>
+    <div className={cn("relative flex-1 overflow-hidden bg-background", className)}>
       <style dangerouslySetInnerHTML={{
         __html: `
           /* A more vibrant and readable color scheme for syntax highlighting */
@@ -109,7 +108,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       
       <div className="absolute inset-0 flex">
         {/* Line numbers */}
-        <div className="w-14 bg-gray-800 border-r border-gray-700 flex flex-col text-gray-400 text-sm select-none">
+        <div className="w-14 bg-muted border-r border-border flex flex-col text-muted-foreground text-sm select-none">
           <div className="px-3 py-4 font-mono leading-6">
             {value.split('\n').map((_, index) => (
               <div key={index} className="text-right min-h-[24px] flex items-center justify-end">
@@ -120,10 +119,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         </div>
         
         {/* Code area */}
-        <div className="flex-1 relative bg-gray-900">
+        <div className="flex-1 relative bg-background">
           <pre
             ref={preRef}
-            className="absolute inset-0 p-4 font-mono text-sm leading-6 overflow-auto pointer-events-none whitespace-pre-wrap break-words text-gray-100"
+            className="absolute inset-0 p-4 font-mono text-sm leading-6 overflow-auto pointer-events-none whitespace-pre-wrap break-words text-secondary-foreground"
           />
           
           <textarea
@@ -132,12 +131,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             onScroll={handleScroll}
-            className="absolute inset-0 p-4 bg-transparent text-transparent caret-white font-mono text-sm leading-6 resize-none outline-none overflow-auto whitespace-pre-wrap break-words selection:bg-blue-500/30"
-            style={{ 
-              background: 'transparent',
-              color: 'transparent',
-              caretColor: '#3b82f6'
-            }}
+            className="absolute inset-0 p-4 bg-transparent text-transparent caret-blue-500 font-mono text-sm leading-6 resize-none outline-none overflow-auto whitespace-pre-wrap break-words selection:bg-blue-500/30"
             spellCheck={false}
             autoComplete="off"
             autoCorrect="off"

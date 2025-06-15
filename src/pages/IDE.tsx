@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -270,8 +269,8 @@ ${jsTag}
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      <div className="border-b border-gray-700/50 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10 shadow-lg">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10 shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
@@ -279,10 +278,10 @@ ${jsTag}
                 Web IDE
               </h1>
               <Select value={mode} onValueChange={(value: 'single' | 'split') => setMode(value)}>
-                <SelectTrigger className="w-44 bg-gray-800/70 border-gray-600 hover:bg-gray-700/70 transition-colors">
+                <SelectTrigger className="w-44 bg-secondary border-border hover:bg-accent transition-colors">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectContent className="bg-popover border-border text-popover-foreground">
                   <SelectItem value="single">Single File Mode</SelectItem>
                   <SelectItem value="split">Split Files Mode</SelectItem>
                 </SelectContent>
@@ -294,11 +293,11 @@ ${jsTag}
                 <Play className="w-4 h-4 mr-2" />
                 Run Code
               </Button>
-              <Button onClick={resetCode} variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400">
+              <Button onClick={resetCode} variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:text-orange-300 transition-colors">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Reset
               </Button>
-              <Button onClick={downloadProject} variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400">
+              <Button onClick={downloadProject} variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 hover:text-blue-300 transition-colors">
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </Button>
@@ -310,11 +309,11 @@ ${jsTag}
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-[calc(100vh-140px)]">
           {/* Code Editor Section */}
-          <Card className="bg-gray-800/50 border-gray-700/50 flex flex-col shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center justify-between p-4 border-b border-gray-700/50 bg-gray-800/30">
+          <Card className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-card/80">
               <div className="flex items-center space-x-3">
                 <Code className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-semibold text-gray-100">Code Editor</h2>
+                <h2 className="text-lg font-semibold text-foreground">Code Editor</h2>
               </div>
               <div className="flex space-x-2">
                 <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
@@ -333,14 +332,14 @@ ${jsTag}
                 />
               ) : (
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-                  <TabsList className="bg-gray-700/50 border-b border-gray-600/50 rounded-none p-1">
-                    <TabsTrigger value="html" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white font-medium px-4">
+                  <TabsList className="bg-muted border-b border-border rounded-none p-1">
+                    <TabsTrigger value="html" className="text-muted-foreground data-[state=active]:bg-orange-500 data-[state=active]:text-white font-medium px-4">
                       HTML
                     </TabsTrigger>
-                    <TabsTrigger value="css" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white font-medium px-4">
+                    <TabsTrigger value="css" className="text-muted-foreground data-[state=active]:bg-blue-500 data-[state=active]:text-white font-medium px-4">
                       CSS
                     </TabsTrigger>
-                    <TabsTrigger value="js" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white font-medium px-4">
+                    <TabsTrigger value="js" className="text-muted-foreground data-[state=active]:bg-purple-500 data-[state=active]:text-white font-medium px-4">
                       JavaScript
                     </TabsTrigger>
                   </TabsList>
@@ -377,11 +376,11 @@ ${jsTag}
           </Card>
 
           {/* Preview Section */}
-          <Card className="bg-gray-800/50 border-gray-700/50 flex flex-col shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center justify-between p-4 border-b border-gray-700/50 bg-gray-800/30">
+          <Card className="bg-card border-border flex flex-col shadow-2xl backdrop-blur-sm">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-card/80">
               <div className="flex items-center space-x-3">
                 <Eye className="w-5 h-5 text-green-400" />
-                <h2 className="text-lg font-semibold text-gray-100">Live Preview</h2>
+                <h2 className="text-lg font-semibold text-foreground">Live Preview</h2>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-sm"></div>
@@ -389,7 +388,7 @@ ${jsTag}
               </div>
             </div>
             
-            <div className="flex-1 p-4 bg-gray-50">
+            <div className="flex-1 p-4 bg-transparent">
               <PreviewFrame
                 key={previewKey}
                 htmlContent={generateCombinedHTML()}

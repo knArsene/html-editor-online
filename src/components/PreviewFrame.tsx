@@ -12,7 +12,7 @@ export const PreviewFrame: React.FC<PreviewFrameProps> = ({
   className
 }) => {
   return (
-    <div className={cn("relative bg-white rounded-xl overflow-hidden border border-gray-200 shadow-lg", className)}>
+    <div className={cn("relative bg-background rounded-xl overflow-hidden border shadow-lg", className)}>
       <iframe
         srcDoc={htmlContent}
         className="w-full h-full border-0 rounded-xl"
