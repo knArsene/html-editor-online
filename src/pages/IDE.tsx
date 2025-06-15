@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { IDEHeader } from '@/components/IDEHeader';
 import { EditorSection } from '@/components/EditorSection';
 import { PreviewSection } from '@/components/PreviewSection';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 interface FileContent {
   [fileName: string]: string;
@@ -180,37 +178,21 @@ const IDE = () => {
       />
 
       <div className="container mx-auto px-4 py-6">
-        <div className="h-[calc(100vh-140px)]">
-          <ResizablePanelGroup direction="horizontal" className="h-full">
-            <ResizablePanel 
-              defaultSize={50} 
-              minSize={30}
-              className="min-w-0"
-            >
-              <EditorSection
-                mode={mode}
-                files={files}
-                activeFile={activeFile}
-                onActiveFileChange={setActiveFile}
-                onFileUpdate={updateFile}
-                onFileCreate={createFile}
-                onFileDelete={deleteFile}
-              />
-            </ResizablePanel>
-            
-            <ResizableHandle withHandle className="w-2 hover:bg-accent/50 transition-colors" />
-            
-            <ResizablePanel 
-              defaultSize={50} 
-              minSize={30}
-              className="min-w-0"
-            >
-              <PreviewSection
-                htmlContent={generateCombinedHTML()}
-                previewKey={previewKey}
-              />
-            </ResizablePanel>
-          </ResizablePanelGroup>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-[calc(100vh-140px)]">
+          <EditorSection
+            mode={mode}
+            files={files}
+            activeFile={activeFile}
+            onActiveFileChange={setActiveFile}
+            onFileUpdate={updateFile}
+            onFileCreate={createFile}
+            onFileDelete={deleteFile}
+          />
+
+          <PreviewSection
+            htmlContent={generateCombinedHTML()}
+            previewKey={previewKey}
+          />
         </div>
       </div>
     </div>
