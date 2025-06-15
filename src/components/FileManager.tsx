@@ -7,7 +7,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { FileAddMenu } from "./FileAddMenu";
 import { FileItemRow } from "./FileItemRow";
 
-interface FileItem {
+export interface FileItem {   // <-- changed to export here
   name: string;
   type: 'file' | 'image';
   url?: string; // For images
