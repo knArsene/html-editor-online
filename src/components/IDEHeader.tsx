@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -43,9 +42,8 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
           <div className="flex items-center space-x-1 sm:space-x-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={onRunCode} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg" size="sm">
-                  <Play className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Run</span>
+                <Button onClick={onRunCode} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg" size="icon">
+                  <Play className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -55,9 +53,8 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
             
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={onResetCode} variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:text-orange-300 transition-colors" size="sm">
-                  <RefreshCw className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Reset</span>
+                <Button onClick={onResetCode} variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:text-orange-300 transition-colors" size="icon">
+                  <RefreshCw className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -67,9 +64,8 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={onDownloadProject} variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 hover:text-blue-300 transition-colors" size="sm">
-                  <Download className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Download</span>
+                <Button onClick={onDownloadProject} variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 hover:text-blue-300 transition-colors" size="icon">
+                  <Download className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
