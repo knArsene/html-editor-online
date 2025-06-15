@@ -91,18 +91,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     <div className={cn("relative flex-1 overflow-hidden bg-gray-900", className)}>
       <style dangerouslySetInnerHTML={{
         __html: `
-          .html-tag { color: #f97316; font-weight: 600; }
-          .html-attr { color: #06b6d4; }
-          .html-string { color: #22c55e; }
-          .html-comment { color: #6b7280; font-style: italic; }
-          .css-selector { color: #f59e0b; font-weight: 600; }
-          .css-property { color: #3b82f6; }
-          .css-value { color: #22c55e; }
-          .css-comment { color: #6b7280; font-style: italic; }
-          .js-keyword { color: #a855f7; font-weight: 600; }
-          .js-string { color: #22c55e; }
-          .js-number { color: #f97316; }
-          .js-comment { color: #6b7280; font-style: italic; }
+          /* A more vibrant and readable color scheme for syntax highlighting */
+          .html-tag { color: #38bdf8; /* sky-400 */ }
+          .html-attr { color: #facc15; /* amber-400 */ }
+          .html-string { color: #34d399; /* emerald-400 */ }
+          .html-comment { color: #94a3b8; font-style: italic; /* slate-400 */ }
+          .css-selector { color: #fb7185; /* rose-400 */ }
+          .css-property { color: #22d3ee; /* cyan-400 */ }
+          .css-value { color: #34d399; /* emerald-400 */ }
+          .css-comment { color: #94a3b8; font-style: italic; /* slate-400 */ }
+          .js-keyword { color: #e879f9; font-weight: 600; /* fuchsia-400 */ }
+          .js-string { color: #34d399; /* emerald-400 */ }
+          .js-number { color: #a3e635; /* lime-400 */ }
+          .js-comment { color: #94a3b8; font-style: italic; /* slate-400 */ }
         `
       }} />
       
@@ -123,7 +124,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           <pre
             ref={preRef}
             className="absolute inset-0 p-4 font-mono text-sm leading-6 overflow-auto pointer-events-none whitespace-pre-wrap break-words text-gray-100"
-            style={{ color: 'transparent' }}
           />
           
           <textarea
