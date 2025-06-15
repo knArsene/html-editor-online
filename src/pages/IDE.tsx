@@ -1,4 +1,3 @@
-
 import React, { Suspense, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -431,7 +430,12 @@ console.log('New JavaScript file created');`;
         <div className="h-[calc(100vh-194px)] flex gap-6">
           <ResizablePanelGroup direction="horizontal" className="min-h-full flex-1">
             <ResizablePanel defaultSize={50} minSize={30}>
-              <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading editor...</div>}>
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-full">
+                  <div className="w-10 h-10 rounded-full border-4 border-blue-400 border-t-transparent animate-spin mr-2" />
+                  <span className="text-muted-foreground">Loading editor...</span>
+                </div>
+              }>
                 <EditorPanel
                   mode={mode}
                   files={files}
@@ -455,7 +459,12 @@ console.log('New JavaScript file created');`;
             />
 
             <ResizablePanel defaultSize={50} minSize={30}>
-              <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading preview...</div>}>
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-full">
+                  <div className="w-8 h-8 rounded-full border-4 border-green-400 border-t-transparent animate-spin mr-2" />
+                  <span className="text-green-500/80">Loading preview...</span>
+                </div>
+              }>
                 <PreviewPanel
                   htmlContent={generateCombinedHTML()}
                   previewKey={previewKey}
