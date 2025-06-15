@@ -1,6 +1,8 @@
+
 import React, { Suspense, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { Footer } from '@/components/Footer';
 
 // Lazy-load panels for faster initial load
 const EditorPanel = React.lazy(() => import('./IDE/EditorPanel').then(m => ({ default: m.EditorPanel })));
@@ -426,7 +428,7 @@ console.log('New JavaScript file created');`;
       />
 
       <div className="container mx-auto px-4 py-6">
-        <div className="h-[calc(100vh-140px)] flex gap-6">
+        <div className="h-[calc(100vh-194px)] flex gap-6">
           <ResizablePanelGroup direction="horizontal" className="min-h-full flex-1">
             <ResizablePanel defaultSize={50} minSize={30}>
               <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading editor...</div>}>
@@ -463,6 +465,7 @@ console.log('New JavaScript file created');`;
           </ResizablePanelGroup>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
