@@ -1,4 +1,3 @@
-
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -6,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import IDE from "./pages/IDE";
+import Info from "./pages/Info";
 
 const queryClient = new QueryClient();
 
@@ -17,7 +17,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Render IDE for all routes */}
+            {/* Render IDE for all routes except /info */}
+            <Route path="info" element={<Info />} />
             <Route path="*" element={<IDE />} />
           </Routes>
         </BrowserRouter>
