@@ -1,147 +1,228 @@
-
 import React, { useState } from 'react';
 import { IDEHeader } from '@/components/IDEHeader';
 import { EditorSection } from '@/components/EditorSection';
 import { PreviewSection } from '@/components/PreviewSection';
-import { FileManager } from '@/components/FileManager';
-import { Plus } from 'lucide-react';
+import { useFileSync } from "@/hooks/useFileSync";
 
-const DEFAULT_SINGLE_HTML = `<!DOCTYPE html>
+interface FileContent {
+  html: string;
+  css: string;
+  js: string;
+}
+
+const INITIAL_FILES = {
+  html: `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Project</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
-    <!-- Start coding here! -->
+    <div class="container">
+        <h1>Welcome to Your First Web Page!</h1>
+        <p>This is a beautiful HTML page with modern CSS and interactive JavaScript.</p>
+        <button onclick="changeColor()">Click me to change colors!</button>
+        <div id="output">Click the button to see magic happen! ✨</div>
+    </div>
+
+    <script>
+        function changeColor() {
+            const colors = [
+                'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
+                'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
+                'linear-gradient(135deg, #45b7d1 0%, #96c93d 100%)',
+                'linear-gradient(135deg, #96ceb4 0%, #ffecd2 100%)',
+                'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)',
+                'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%)'
+            ];
+            const messages = [
+                '🎨 Beautiful new gradient applied!',
+                '✨ Colors changed successfully!',
+                '🌈 Looking fantastic!',
+                '🎉 Amazing color combination!',
+                '💫 Stunning visual update!',
+                '🔥 Perfect color choice!'
+            ];
+            
+            const randomIndex = Math.floor(Math.random() * colors.length);
+            const randomColor = colors[randomIndex];
+            const randomMessage = messages[randomIndex];
+            
+            document.body.style.background = randomColor;
+            document.getElementById('output').innerHTML = \`<p style="font-size: 1.1em; font-weight: bold;">\${randomMessage}</p>\`;
+        }
+    </script>
 </body>
-</html>`;
+</html>`,
+  css: `body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-export type FileMap = { [filename: string]: string };
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
 
-const DEFAULT_FILES: FileMap = {
-  "index.html": "",
-  "style.css": "",
-  "script.js": ""
-};
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
 
-const DEFAULT_SINGLE_FILE = {
-  html: DEFAULT_SINGLE_HTML,
-  css: "",
-  js: ""
+p {
+  font-size: 1.2em;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+button {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+#output {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`,
+  js: `function changeColor() {
+  const colors = [
+    'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
+    'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
+    'linear-gradient(135deg, #45b7d1 0%, #96c93d 100%)',
+    'linear-gradient(135deg, #96ceb4 0%, #ffecd2 100%)',
+    'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)',
+    'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%)'
+  ];
+  const messages = [
+    '🎨 Beautiful new gradient applied!',
+    '✨ Colors changed successfully!',
+    '🌈 Looking fantastic!',
+    '🎉 Amazing color combination!',
+    '💫 Stunning visual update!',
+    '🔥 Perfect color choice!'
+  ];
+  
+  const randomIndex = Math.floor(Math.random() * colors.length);
+  const randomColor = colors[randomIndex];
+  const randomMessage = messages[randomIndex];
+  
+  document.body.style.background = randomColor;
+  document.getElementById('output').innerHTML = \`<p style="font-size: 1.1em; font-weight: bold;">\${randomMessage}</p>\`;
+}`
 };
 
 const IDE = () => {
-  // "single": just one big HTML blob, "split": multiple named files
-  const [mode, setMode] = useState<"single" | "split">("single");
+  // Use custom hook for file sync
+  const {
+    files,
+    setFiles: updateFile,
+    mode,
+    setMode
+  } = useFileSync(INITIAL_FILES, "single");
 
-  // In SPLIT mode: map of filename to content
-  const [files, setFiles] = useState<FileMap>({ ...DEFAULT_FILES });
-
-  // In SPLIT mode: track current file being edited
-  const [activeFile, setActiveFile] = useState("index.html");
-
-  // In SINGLE mode:
-  const [single, setSingle] = useState({ ...DEFAULT_SINGLE_FILE });
-
-  // For preview <iframe>
+  const [activeTab, setActiveTab] = useState("html");
   const [previewKey, setPreviewKey] = useState(0);
 
-  // Handler: switch modes
-  const handleModeChange = (newMode: "single" | "split") => {
-    setMode(newMode);
-    if (newMode === "split") {
-      // When first switching, clear files (user must add files manually)
-      setFiles({});
-      setActiveFile(""); // no file selected at start
-    } else {
-      // When back to single, prefill with empty HTML
-      setSingle({ ...DEFAULT_SINGLE_FILE });
-    }
-  };
+  const runCode = () => setPreviewKey(prev => prev + 1);
 
-  // Handler: adding a new file
-  const handleFileCreate = () => {
-    let name = window.prompt("Enter new file name (e.g. style.css):", "");
-    if (!name) return;
-    name = name.trim();
-    if (!name) return;
-    if (files[name]) {
-      alert("A file with that name already exists.");
-      return;
-    }
-    setFiles(prev => ({ ...prev, [name]: "" }));
-    setActiveFile(name);
-  };
+  // Always generate combined HTML for preview/download
+  const generateCombinedHTML = () => files.html;
 
-  // Handler: delete a file
-  const handleFileDelete = (file: string) => {
-    if (!window.confirm(`Delete file "${file}"?`)) return;
-    setFiles(prev => {
-      const newFiles = { ...prev };
-      delete newFiles[file];
-      return newFiles;
-    });
-    if (activeFile === file) {
-      const remaining = Object.keys(files).filter(f => f !== file);
-      setActiveFile(remaining[0] || "");
-    }
-  };
-
-  // Editor content get/set for SPLIT mode
-  const getEditorValue = () => {
-    if (mode === "single") {
-      return single;
-    }
-    // For split, show the content for selected file (default to blank)
-    if (!activeFile) return { html: "", css: "", js: "" };
-    // EditorSection expects {html, css, js}, but for custom files we'll show a blank js editor.
-    const ext = activeFile.split('.').pop();
-    let out = { html: "", css: "", js: "" };
-    if (ext === "html") out.html = files[activeFile] || "";
-    else if (ext === "css") out.css = files[activeFile] || "";
-    else if (ext === "js") out.js = files[activeFile] || "";
-    else out.html = files[activeFile] || "";
-    return out;
-  };
-  const handleEditorChange = (type: "html" | "css" | "js", val: string) => {
-    if (mode === "single") {
-      setSingle(prev => ({ ...prev, [type]: val }));
-    } else if (activeFile) {
-      setFiles(prev => ({ ...prev, [activeFile]: val }));
-    }
-  };
-
-  // Combine files for preview: for split mode, try to combine html/css/js if those files exist, otherwise blank
-  const generateCombinedHTML = () => {
-    if (mode === "single") {
-      return single.html;
-    }
-    const html = files["index.html"] || "";
-    const css = files["style.css"] || "";
-    const js = files["script.js"] || "";
-    let out = html;
-    // Insert <style> if present
-    if (css.trim()) {
-      out = out.replace(/<\/head>/i, `<style>\n${css}\n</style>\n</head>`);
-      if (!/<\/head>/i.test(out)) {
-        // No head: prepend style top
-        out = `<style>\n${css}\n</style>\n` + out;
-      }
-    }
-    // Insert <script> if present
-    if (js.trim()) {
-      out = out.replace(/<\/body>/i, `<script>\n${js}\n</script>\n</body>`);
-      if (!/<\/body>/i.test(out)) {
-        // No body: append at end
-        out += `\n<script>\n${js}\n</script>\n`;
-      }
-    }
-    return out;
-  };
-
-  // Download Project
   const downloadProject = () => {
     const htmlContent = generateCombinedHTML();
     const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -155,57 +236,35 @@ const IDE = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Reset (single: blank, split: remove all files)
   const resetCode = () => {
-    if (!window.confirm('Are you sure you want to reset all code?')) return;
-    if (mode === "single") {
-      setSingle({ ...DEFAULT_SINGLE_FILE });
-    } else {
-      setFiles({});
-      setActiveFile("");
+    if (confirm('Are you sure you want to reset all code? This action cannot be undone.')) {
+      updateFile("html", "");
+      updateFile("css", "");
+      updateFile("js", "");
+      setPreviewKey(prev => prev + 1);
     }
-    setPreviewKey(prev => prev + 1);
   };
-
-  // "Run" just triggers previewKey update
-  const runCode = () => setPreviewKey(prev => prev + 1);
-
-  // For EditorSection: only show if there's a file selected in split, or all in single
-  const showEditor = mode === "single" || !!activeFile;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <IDEHeader
         mode={mode}
-        onModeChange={handleModeChange}
+        onModeChange={setMode}
         onRunCode={runCode}
         onResetCode={resetCode}
         onDownloadProject={downloadProject}
       />
+
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-[calc(100vh-140px)]">
-          <div className="flex flex-col h-full">
-            {/* File manager only for split mode */}
-            {mode === "split" && (
-              <FileManager
-                files={Object.keys(files)}
-                activeFile={activeFile}
-                onFileSelect={setActiveFile}
-                onFileCreate={handleFileCreate}
-                onFileDelete={handleFileDelete}
-              />
-            )}
-            {/* Code editor */}
-            {showEditor && (
-              <EditorSection
-                mode={mode}
-                files={getEditorValue()}
-                activeTab={activeFile.split('.').pop() || "html"}
-                onActiveTabChange={() => {}}
-                onFileUpdate={handleEditorChange}
-              />
-            )}
-          </div>
+          <EditorSection
+            mode={mode}
+            files={files}
+            activeTab={activeTab}
+            onActiveTabChange={setActiveTab}
+            onFileUpdate={updateFile}
+          />
+
           <PreviewSection
             htmlContent={generateCombinedHTML()}
             previewKey={previewKey}
@@ -215,4 +274,5 @@ const IDE = () => {
     </div>
   );
 };
+
 export default IDE;
