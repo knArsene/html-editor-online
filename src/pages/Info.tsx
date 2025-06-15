@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -57,7 +58,7 @@ export const Info: React.FC = () => {
         >
           <h2 className="text-2xl font-bold mb-3">About</h2>
           <p>
-            Welcome to the Web IDE! This platform enables you to build, edit, and preview web projects directly in your browser. Whether you are learning, prototyping, or shipping features, our IDE supports you all the way—from HTML/CSS/JS to deploying projects live.
+            Welcome to html-editor.online! This platform enables you to build, edit, and preview web projects directly in your browser. Whether you are learning, prototyping, or shipping features, html-editor.online supports you all the way—from HTML/CSS/JS to deploying projects live.
           </p>
         </section>
         {/* Blog */}
@@ -111,7 +112,7 @@ export const Info: React.FC = () => {
         >
           <h2 className="text-2xl font-bold mb-3">Contact</h2>
           <p>
-            Have questions or feedback? Reach out to us at support@webide.com. We love helping users and improving the platform.
+            Have questions or feedback? Reach out to us at <a href="mailto:imbugazange@gmail.com" className="text-primary font-medium underline">imbugazange@gmail.com</a>. We love helping users and improving the platform.
           </p>
         </section>
         {/* Terms */}
@@ -122,7 +123,7 @@ export const Info: React.FC = () => {
         >
           <h2 className="text-2xl font-bold mb-3">Terms</h2>
           <p>
-            By using Web IDE, you agree to comply with our terms of service. Please use the platform responsibly and respect our community guidelines.
+            By using html-editor.online, you agree to comply with our terms of service. Please use the platform responsibly and respect our community guidelines.
           </p>
         </section>
         {/* Privacy Policy */}

@@ -26,7 +26,7 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center space-x-2 sm:space-x-6">
             <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent shrink-0">
-              Web IDE
+              html-editor.online
             </h1>
             <Select value={mode} onValueChange={onModeChange}>
               <SelectTrigger className="w-[160px] sm:w-[180px] bg-secondary border-border hover:bg-accent transition-colors text-foreground">
