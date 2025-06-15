@@ -29,12 +29,12 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
               Web IDE
             </h1>
             <Select value={mode} onValueChange={onModeChange}>
-              <SelectTrigger className="w-[130px] sm:w-44 bg-secondary border-border hover:bg-accent transition-colors text-foreground">
+              <SelectTrigger className="w-[160px] sm:w-[180px] bg-secondary border-border hover:bg-accent transition-colors text-foreground">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border text-popover-foreground">
-                <SelectItem value="single">Single File</SelectItem>
-                <SelectItem value="split">Split Files</SelectItem>
+                <SelectItem value="single">Single File Mode</SelectItem>
+                <SelectItem value="split">Split File Mode</SelectItem>
               </SelectContent>
             </Select>
           </div>
