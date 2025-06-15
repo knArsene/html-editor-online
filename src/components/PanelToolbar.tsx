@@ -1,8 +1,7 @@
 
 import React from "react";
-import { fullscreen } from "lucide-react/icons";
+import { Fullscreen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { icons } from "lucide-react";
 
 interface PanelToolbarProps {
   icon: React.ReactNode;
@@ -17,7 +16,6 @@ export const PanelToolbar: React.FC<PanelToolbarProps> = ({
   onFullscreen,
   children,
 }) => {
-  const FullscreenIcon = icons["fullscreen"];
   return (
     <div className="flex items-center justify-between p-4 border-b border-border bg-card/80 relative">
       <div className="flex items-center space-x-3">
@@ -33,7 +31,7 @@ export const PanelToolbar: React.FC<PanelToolbarProps> = ({
             className="p-1 rounded hover:bg-accent transition-colors"
             type="button"
           >
-            <FullscreenIcon className="w-5 h-5 text-muted-foreground" />
+            <Fullscreen className="w-5 h-5 text-muted-foreground" />
           </button>
         )}
       </div>
