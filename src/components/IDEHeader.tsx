@@ -50,7 +50,8 @@ export const IDEHeader: React.FC<IDEHeaderProps> = ({
               <TooltipTrigger asChild>
                 <Button 
                   onClick={onRunCode} 
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg" 
+                  variant="outline" 
+                  className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:border-green-400 hover:text-green-300 transition-colors" 
                   size={isMobile ? "sm" : "icon"}
                 >
                   <Play className={isMobile ? "w-3 h-3" : "w-4 h-4"} />
