@@ -45,6 +45,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         bracketPairs: true,
         indentation: true
       },
+      // Fix cursor positioning issues
+      stopRenderingLineAfter: -1,
+      renderWhitespace: 'none',
+      renderControlCharacters: false,
+      disableLayerHinting: true,
+      fontLigatures: false,
       suggest: {
         showKeywords: true,
         showSnippets: true,
@@ -71,6 +77,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         showTypeParameters: true
       }
     });
+
+    // Force editor to recalculate line endings and cursor positions
+    editor.getModel()?.setValue(editor.getModel()?.getValue() || '');
 
     // Add custom CSS snippets
     if (language === 'css') {
@@ -188,6 +197,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 3,
           renderLineHighlight: 'gutter',
+          // Fix line ending detection issues
+          stopRenderingLineAfter: -1,
+          renderWhitespace: 'none',
+          renderControlCharacters: false,
+          disableLayerHinting: true,
+          fontLigatures: false,
           scrollbar: {
             vertical: 'auto',
             horizontal: 'auto',
