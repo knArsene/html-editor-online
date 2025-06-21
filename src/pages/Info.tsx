@@ -1,8 +1,7 @@
-
 import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Shield, Users, Mail, Code, Zap, Globe } from "lucide-react";
+import { Shield, Users, Mail, Code, Zap, Globe, ArrowLeft } from "lucide-react";
 
 const sections = [
   { key: "about", label: "About", icon: Code },
@@ -32,8 +31,17 @@ export const Info: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
+        {/* Header with Back Button */}
+        <div className="text-center mb-12 relative">
+          <button
+            onClick={() => navigate('/')}
+            className="absolute left-0 top-0 flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent/50"
+            type="button"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">Back to IDE</span>
+          </button>
+          
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-4">
             HTML Editor Online
           </h1>
